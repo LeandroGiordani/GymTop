@@ -1,0 +1,95 @@
+# Android Studio / IDE
+*.iml
+.gradle
+/local.properties
+/.idea/
+local.properties
+.DS_Store
+
+# Build outputs
+/build
+/captures
+*.apk
+*.ap_
+*.aab
+*.jar
+*.aar
+*.zip
+*.tar.gz
+*.rar
+
+# Android Native
+.externalNativeBuild
+.cxx
+CMakeLists.txt.user
+
+# Gradle
+.gradle/
+gradle/
+
+# Compiled files
+*.class
+*.o
+*.so
+
+# KSP and annotation processing
+.kspCaches/
+kspCaches/
+
+# Build logs and temporary files
+build_log.txt
+build_log2.txt
+*.log
+gradle.log
+*.tmp
+*.temp
+*.bak
+~*
+
+# Documentation and study materials (student files)
+QUICKSTART.md
+ARCHITECTURE.md
+IMPLEMENTATION_SUMMARY.md
+README_CHECKLIST.md
+STRUCTURE_VISUAL.md
+READY_TO_CODE.txt
+*.md.bak
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+Thumbs.db
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-project
+*.sublime-workspace
+.vscode/
+*.code-workspace
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# Kotlin
+.kotlin/
+*.kexe
+
+# Java
+out/
+bin/
+gen/
+
