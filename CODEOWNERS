@@ -1,0 +1,20 @@
+# This file defines code ownership for the repository
+# More info about CODEOWNERS: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for all files
+* @LeandroGiordani
+
+# Android app specific files
+/app/ @LeandroGiordani
+/gradle/ @LeandroGiordani
+*.gradle.kts @LeandroGiordani
+
+# Build and dependency files
+build.gradle.kts @LeandroGiordani
+settings.gradle.kts @LeandroGiordani
+gradle.properties @LeandroGiordani
+
+# Configuration files
+.gitignore @LeandroGiordani
+.github/ @LeandroGiordani
+
