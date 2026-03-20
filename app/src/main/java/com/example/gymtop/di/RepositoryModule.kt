@@ -1,8 +1,10 @@
 package com.example.gymtop.di
 
 import com.example.gymtop.data.dao.ExerciseDao
+import com.example.gymtop.data.dao.SetDao
 import com.example.gymtop.data.dao.WorkoutDao
 import com.example.gymtop.data.repository.ExerciseRepository
+import com.example.gymtop.data.repository.SetRepository
 import com.example.gymtop.data.repository.WorkoutRepository
 import dagger.Module
 import dagger.Provides
@@ -57,6 +59,19 @@ object RepositoryModule {
         exerciseDao: ExerciseDao
     ): ExerciseRepository {
         return ExerciseRepository(exerciseDao)
+    }
+
+    /**
+     * Fornece a instância do SetRepository como Singleton
+     *
+     * Hilt injeta automaticamente o SetDao necessário (fornecido por DatabaseModule)
+     */
+    @Provides
+    @Singleton
+    fun provideSetRepository(
+        setDao: SetDao
+    ): SetRepository {
+        return SetRepository(setDao)
     }
 
     /**

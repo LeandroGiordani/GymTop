@@ -38,10 +38,6 @@ data class ExerciseEntity(
 
     val name: String,
 
-    val type: String, // "REPS or "DURATION
-
-    val setsJson: String,
-
     val workoutId: Long
 )
 

@@ -5,11 +5,11 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.gymtop.data.entity.WorkoutEntity
+import com.example.gymtop.data.entity.Workout
 import kotlinx.coroutines.flow.Flow
 
 /**
- * WorkoutDao - Data Access Object para operações com a tabela WorkoutEntity
+ * WorkoutDao - Data Access Object para operações com a tabela Workout
  *
  * @Dao: Anotação que marca esta interface como um DAO. Room implementará automaticamente
  * as operações SQL baseado nas anotações e nas queries que escrevemos.
@@ -29,34 +29,34 @@ interface WorkoutDao {
      * @return Long: ID do treino inserido
      */
     @Insert
-    suspend fun insert(workout: WorkoutEntity): Long
+    suspend fun insert(workout: Workout): Long
 
     /**
      * Atualiza um treino existente
      * @param workout: Objeto treino com dados atualizados
      */
     @Update
-    suspend fun update(workout: WorkoutEntity)
+    suspend fun update(workout: Workout)
 
     /**
      * Deleta um treino
      * @param workout: Objeto treino a ser deletado
      */
     @Delete
-    suspend fun delete(workout: WorkoutEntity)
+    suspend fun delete(workout: Workout)
 
     /**
      * Obtém todos os treinos ordenados por data (descendente - mais recentes primeiro)
      * Retorna um Flow que emite automaticamente quando há mudanças
      */
     @Query("SELECT * FROM workouts ORDER BY date DESC")
-    fun getAllWorkouts(): Flow<List<WorkoutEntity>>
+    fun getAllWorkouts(): Flow<List<Workout>>
 
     /**
      * Obtém um treino específico pelo ID
      */
     @Query("SELECT * FROM workouts WHERE id = :workoutId")
-    suspend fun getWorkoutById(workoutId: Long): WorkoutEntity?
+    suspend fun getWorkoutById(workoutId: Int): Workout?
 
     /**
      * TODO: Implementar queries adicionais conforme necessário
