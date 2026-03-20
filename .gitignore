@@ -25,7 +25,6 @@ CMakeLists.txt.user
 
 # Gradle
 .gradle/
-gradle/
 
 # Compiled files
 *.class
@@ -92,4 +91,3 @@ dependency-reduced-pom.xml
 out/
 bin/
 gen/
-
