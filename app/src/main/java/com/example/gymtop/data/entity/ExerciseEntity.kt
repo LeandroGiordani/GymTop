@@ -36,8 +36,10 @@ data class ExerciseEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
 
+    val workoutId: Long,
+
     val name: String,
 
-    val workoutId: Long
+    val librarySlug
 )
 
