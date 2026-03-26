@@ -3,6 +3,7 @@ package com.example.gymtop.di
 import com.example.gymtop.data.dao.ExerciseDao
 import com.example.gymtop.data.dao.SetDao
 import com.example.gymtop.data.dao.WorkoutDao
+import com.example.gymtop.data.datasource.LibraryDataSource
 import com.example.gymtop.data.repository.ExerciseRepository
 import com.example.gymtop.data.repository.SetRepository
 import com.example.gymtop.data.repository.WorkoutRepository
@@ -49,16 +50,21 @@ object RepositoryModule {
     }
 
     /**
-     * Fornece a instância do ExerciseRepository como Singleton
+     * Fornece a instância do ExerciseRepository como Singleton.
      *
-     * Hilt injeta automaticamente o ExerciseDao necessário (fornecido por DatabaseModule)
+     * Recebe duas dependências injetadas pelo Hilt:
+     * - exerciseDao: fornecido por DatabaseModule
+     * - libraryDataSource: @Singleton com @Inject constructor, Hilt resolve automaticamente
+     *
+     * O ExerciseRepository combina as duas fontes para montar o Exercise (domain model).
      */
     @Provides
     @Singleton
     fun provideExerciseRepository(
-        exerciseDao: ExerciseDao
+        exerciseDao: ExerciseDao,
+        libraryDataSource: LibraryDataSource
     ): ExerciseRepository {
-        return ExerciseRepository(exerciseDao)
+        return ExerciseRepository(exerciseDao, libraryDataSource)
     }
 
     /**

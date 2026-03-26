@@ -1,20 +1,14 @@
 package com.example.gymtop.domain.model
 
-import com.example.gymtop.data.entity.ExerciseEntity
-
 /**
- * WorkoutEntity - modelo de domínio para um treino.
+ * Workout - Modelo de domínio para um treino.
  *
- * Este arquivo contém apenas o esqueleto mínimo que usamos inicialmente no MVP.
- * - Preferi usar tipos simples (Int para id, String para title) para manter compatibilidade
- *   com as referências já existentes no projeto (ex.: WorkoutListScreen usa Int).
- * - Comentários explicativos foram adicionados para você relembrar conceitos e guiar
- *   futuras extensões (Room entity, validações, timestamps, etc.).
+ * Pertence ao Domain Layer — não tem dependências de Android ou Room.
+ * Isso facilita testes unitários e eventual migração para Kotlin Multiplatform.
  *
- * TODOs possíveis quando for expandir:
- * - Marcar com @Entity and adicionar Room annotations
- * - Usar Long para id com autogeracao no banco
- * - Adicionar campos como duration, exercises: List<ExerciseEntity>, tags, createdAt
+ * exercises é uma lista de Exercise (domain), onde cada Exercise já carrega
+ * seu LibraryExercise (nome, grupo muscular, etc.) e suas séries (List<SetType>).
+ * A UI consome este objeto diretamente sem precisar acessar DAOs ou o JSON.
  */
 
 data class Workout(

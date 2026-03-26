@@ -5,21 +5,25 @@ import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 /**
- * ExerciseEntity - Entidade Room que representa um exercício dentro de um treino
+ * ExerciseEntity - Entidade Room que representa um exercício dentro de um treino.
  *
- * @Entity: Marca como tabela no banco de dados
- * @ForeignKey: Define a relação com WorkoutEntity - cada exercício pertence a um treino
- *   - onDelete = ForeignKey.CASCADE: Se um treino for deletado, seus exercícios também serão
+ * DESIGN DECISION — por que esta entidade é "lean" (enxuta)?
+ * O nome, grupo muscular, equipamento, vídeos e thumbnail NÃO são armazenados aqui.
+ * Esses dados vêm do catálogo (exercise_library.json) e são acessados via LibraryDataSource.
+ * Armazená-los aqui criaria duplicação: se o usuário tem 20 treinos com "Supino", o nome
+ * "Supino" estaria 20 vezes no banco — redundante e inconsistente se o JSON mudar.
  *
- * Atributos:
- * - id: Identificador único do exercício
- * - name: Nome do exercício (ex: "Supino", "Agachamento")
- * - sets: Número de séries
- * - reps: Número de repetições por série
- * - weight: Peso usado (em kg)
- * - workoutId: Foreign Key - referencia o treino ao qual este exercício pertence
+ * O que esta entidade armazena:
+ * - libraryExerciseId: referência ao exercício no catálogo JSON (ex: "043")
+ * - type: tipo padrão das séries ("REPS" ou "DURATION"), escolhido pelo usuário
  *
- * Padrão MVVM: Entidade no Data Layer, representa estrutura bruta do exercício no BD
+ * As séries em si ficam na tabela SetEntity (relação 1:N via exerciseId).
+ * O nome e demais info do exercício são buscados no LibraryDataSource (Map em memória).
+ *
+ * @ForeignKey CASCADE: deletar um treino apaga todos seus exercícios automaticamente.
+ * @Relation em ExerciseWithSets une ExerciseEntity + List<SetEntity> em uma única query.
+ *
+ * Padrão MVVM: Pertence ao Data Layer — representa apenas estrutura de persistência.
  */
 @Entity(
     tableName = "exercises",
@@ -33,13 +37,19 @@ import androidx.room.PrimaryKey
     ]
 )
 data class ExerciseEntity(
+
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
 
+    // Foreign Key — qual treino este exercício pertence
     val workoutId: Long,
 
-    val name: String,
+    // Referência ao catálogo JSON — NÃO duplicamos nome/equipamento/etc aqui
+    // O ExerciseRepository faz lookup no LibraryDataSource usando este id
+    val libraryExerciseId: String,
 
-    val librarySlug
+    // Tipo padrão das séries deste exercício, definido pelo usuário ao montar o treino
+    // "REPS"     → séries por repetições (ex: 3x10)
+    // "DURATION" → séries por tempo (ex: 3x30seg)
+    val type: String
 )
-
