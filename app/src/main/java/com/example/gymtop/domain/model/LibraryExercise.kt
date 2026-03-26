@@ -22,13 +22,18 @@ package com.example.gymtop.domain.model
  * Isso facilita eventual migração para Kotlin Multiplatform (iOS).
  *
  * Campos mapeados do JSON:
- * @param id          campo "id" do JSON (ex: "001", "043", "1156")
- * @param name        campo "nome"
- * @param muscleGroup campo "categoria" (ex: "Costas", "Peito", "Braço")
- * @param muscles     campo "musculos" — lista de músculos envolvidos
- * @param equipment   campo "equipamento" (ex: "Barra", "Halteres", "Cabo")
- * @param thumbnailUrl campo "thumbnail" — caminho relativo do GIF animado
- * @param videoUrl    primeiro item de "male_videos" — URL do vídeo principal
+ * @param id               campo "id" do JSON (ex: "001", "043", "1156")
+ * @param name             campo "nome"
+ * @param muscleGroup      campo "categoria" (ex: "Costas", "Peito", "Braço")
+ * @param muscles          campo "musculos" — lista de músculos envolvidos
+ * @param equipment        campo "equipamento" (ex: "Barra", "Halteres", "Cabo")
+ * @param thumbnailUrl     campo "thumbnail" — caminho relativo do GIF animado
+ * @param maleVideoSide    campo "male_video_side"  — vídeo masculino ângulo lateral
+ * @param maleVideoFront   campo "male_video_front" — vídeo masculino ângulo frontal
+ * @param femaleVideoSide  campo "female_video_side"  — vídeo feminino ângulo lateral
+ * @param femaleVideoFront campo "female_video_front" — vídeo feminino ângulo frontal
+ *
+ * Nota: exercícios com apenas um vídeo disponível terão o campo ausente como "".
  */
 data class LibraryExercise(
     val id: String,
@@ -37,6 +42,9 @@ data class LibraryExercise(
     val muscles: List<String>,
     val equipment: String,
     val thumbnailUrl: String,
-    val videoUrl: String
+    val maleVideoSide: String,
+    val maleVideoFront: String,
+    val femaleVideoSide: String,
+    val femaleVideoFront: String
 )
 

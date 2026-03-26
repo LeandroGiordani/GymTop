@@ -69,11 +69,16 @@ class LibraryDataSource @Inject constructor(
      * Estrutura esperada no JSON:
      * {
      *   "exercicios": [
-     *     { "id": "001", "nome": "...", "categoria": "...", "musculos": [...],
-     *       "equipamento": "...", "thumbnail": "...", "male_videos": [...] },
-     *     ...
+     *     {
+     *       "id": "001", "nome": "...", "categoria": "...", "musculos": [...],
+     *       "equipamento": "...", "thumbnail": "...",
+     *       "male_video_side": "...", "male_video_front": "...",
+     *       "female_video_side": "...", "female_video_front": "..."
+     *     }, ...
      *   ]
      * }
+     *
+     * Exercícios com apenas um vídeo disponível terão o campo ausente como "".
      */
     private fun loadLibrary(): Map<String, LibraryExercise> {
         val inputStream = context.resources.openRawResource(R.raw.exercise_library)
@@ -91,10 +96,6 @@ class LibraryDataSource @Inject constructor(
                 val musclesJson = obj.getJSONArray("musculos")
                 val muscles = (0 until musclesJson.length()).map { musclesJson.getString(it) }
 
-                // Usa o primeiro vídeo masculino como URL principal (fallback: string vazia)
-                val maleVideos = obj.optJSONArray("male_videos")
-                val videoUrl = maleVideos?.optString(0) ?: ""
-
                 put(
                     id,
                     LibraryExercise(
@@ -104,11 +105,14 @@ class LibraryDataSource @Inject constructor(
                         muscles = muscles,
                         equipment = obj.getString("equipamento"),
                         thumbnailUrl = obj.getString("thumbnail"),
-                        videoUrl = videoUrl
+                        // Campos de vídeo nomeados — string vazia se o vídeo não existir
+                        maleVideoSide   = obj.optString("male_video_side",   ""),
+                        maleVideoFront  = obj.optString("male_video_front",  ""),
+                        femaleVideoSide  = obj.optString("female_video_side",  ""),
+                        femaleVideoFront = obj.optString("female_video_front", "")
                     )
                 )
             }
         }
     }
 }
-
