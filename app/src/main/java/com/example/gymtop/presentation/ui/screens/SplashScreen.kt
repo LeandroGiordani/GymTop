@@ -41,18 +41,15 @@ import com.example.gymtop.ui.theme.GymTopOnPrimary
 import com.example.gymtop.ui.theme.GymTopSurface
 
 /**
- * SplashScreen2 — redesigned onboarding / splash screen (v2).
  *
  * All colors are imported from [com.example.gymtop.ui.theme.Color]
  *
  * Visual structure (top → bottom):
- *  1. Ambient glow blobs (purely decorative, rendered behind everything else).
  *  2. Centred column: circular logo  →  "GYM TOP" headline.
  *  3. Bottom section: "COMEÇAR →" CTA button  →  version footer.
  *
  * Improvements over [AnimatedSplashScreen] (v1):
- *  - Proper [Button] composable for the CTA (v1 misused CenterAlignedTopAppBar).
- *  - Arrow icon displayed alongside the label.
+ *  - Proper [Button] composable for the CTA.
  *  - Responsive layout: fillMaxSize + weight instead of hard-coded pixel sizes.
  *  - Stronger neon glow on the headline.
  *  - No dependency on R.drawable.container (uses ⚡ Unicode glyph; swap for
@@ -62,7 +59,7 @@ import com.example.gymtop.ui.theme.GymTopSurface
  *                     to your NavController to push into the main app graph.
  */
 @Composable
-fun SplashScreen2(
+fun SplashScreen(
     onStartClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -195,6 +192,6 @@ fun SplashScreen2(
 @Composable
 private fun SplashScreen2Preview() {
     // onStartClick is left as a no-op for preview purposes
-    SplashScreen2()
+    SplashScreen()
 }
 
