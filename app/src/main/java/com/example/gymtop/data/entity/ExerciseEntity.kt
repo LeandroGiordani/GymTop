@@ -2,6 +2,7 @@ package com.example.gymtop.data.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
@@ -34,7 +35,8 @@ import androidx.room.PrimaryKey
             childColumns = ["workoutId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index("workoutId")]  // índice para acelerar consultas por workoutId
 )
 data class ExerciseEntity(
 

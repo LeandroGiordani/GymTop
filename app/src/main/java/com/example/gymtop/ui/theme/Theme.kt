@@ -1,42 +1,32 @@
 package com.example.gymtop.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+// GymTop dark scheme — maps brand colours to Material3 roles so that any
+// Composable using MaterialTheme.colorScheme automatically gets the right tones.
+private val GymTopDarkColorScheme = darkColorScheme(
+    primary      = GymTopNeonGreen,   // buttons, active indicators
+    onPrimary    = GymTopOnPrimary,   // text/icons placed on top of primary
+    background   = GymTopBackground, // window background
+    onBackground = GymTopNeonGreen,   // default text on background
+    surface      = GymTopSurface,    // cards, dialogs, bottom sheets
+    onSurface    = GymTopNeonGreen,   // text/icons on surface
+    secondary    = PurpleGrey80,
+    tertiary     = Pink80
 )
 
 @Composable
 fun GymTopTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
+    // Set dynamicColor = false to always enforce the GymTop brand palette.
+    // When true, Android 12+ devices may override colours with the system wallpaper.
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
@@ -45,9 +35,8 @@ fun GymTopTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        // Always use the GymTop dark scheme; the app has a dark-only design.
+        else -> GymTopDarkColorScheme
     }
 
     MaterialTheme(

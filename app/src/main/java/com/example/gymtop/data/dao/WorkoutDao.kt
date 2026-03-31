@@ -4,12 +4,15 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
-import com.example.gymtop.data.entity.Workout
+import com.example.gymtop.data.entity.WorkoutEntity
+import com.example.gymtop.data.entity.WorkoutWithExercisesAndSets
 import kotlinx.coroutines.flow.Flow
 
 /**
  * WorkoutDao - Data Access Object para operações com a tabela Workout
+ *
  *
  * @Dao: Anotação que marca esta interface como um DAO. Room implementará automaticamente
  * as operações SQL baseado nas anotações e nas queries que escrevemos.
@@ -18,7 +21,7 @@ import kotlinx.coroutines.flow.Flow
  * Repositories usam DAOs, ViewModels usam Repositories.
  *
  * Flow: Observável reativo que emite novos valores quando os dados mudam no banco.
- * Quando o banco é atualizado, qualquer listener automáticamente recebe os novos dados.
+ * Quando o banco é atualizado, qualquer listener recebe automáticamente os novos dados.
  */
 @Dao
 interface WorkoutDao {
@@ -29,34 +32,42 @@ interface WorkoutDao {
      * @return Long: ID do treino inserido
      */
     @Insert
-    suspend fun insert(workout: Workout): Long
+    suspend fun insert(workout: WorkoutEntity): Long
 
     /**
      * Atualiza um treino existente
      * @param workout: Objeto treino com dados atualizados
      */
     @Update
-    suspend fun update(workout: Workout)
+    suspend fun update(workout: WorkoutEntity)
 
     /**
      * Deleta um treino
      * @param workout: Objeto treino a ser deletado
      */
     @Delete
-    suspend fun delete(workout: Workout)
+    suspend fun delete(workout: WorkoutEntity)
 
     /**
-     * Obtém todos os treinos ordenados por data (descendente - mais recentes primeiro)
+     * Obtém todos os treinos
      * Retorna um Flow que emite automaticamente quando há mudanças
      */
-    @Query("SELECT * FROM workouts ORDER BY date DESC")
-    fun getAllWorkouts(): Flow<List<Workout>>
+    @Query("SELECT * FROM workouts")
+    fun getAllWorkouts(): Flow<List<WorkoutEntity>>
 
     /**
      * Obtém um treino específico pelo ID
      */
     @Query("SELECT * FROM workouts WHERE id = :workoutId")
-    suspend fun getWorkoutById(workoutId: Int): Workout?
+    suspend fun getWorkoutById(workoutId: Long): WorkoutEntity?
+
+    @Transaction
+    @Query("SELECT * FROM workouts WHERE id = :workoutId")
+    suspend fun getWorkoutWithExercisesAndSets(workoutId: Long): WorkoutWithExercisesAndSets?
+
+    @Transaction
+    @Query("SELECT * FROM workouts")
+    fun getAllWorkoutsWithExercisesAndSets(): Flow<List<WorkoutWithExercisesAndSets>>
 
     /**
      * TODO: Implementar queries adicionais conforme necessário

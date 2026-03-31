@@ -2,7 +2,6 @@ package com.example.gymtop.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.gymtop.domain.model.Exercise
 
 /**
  * WorkoutEntity - Entidade Room que representa um treino
