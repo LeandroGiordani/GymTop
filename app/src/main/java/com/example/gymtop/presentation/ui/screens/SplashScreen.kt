@@ -1,8 +1,8 @@
 package com.example.gymtop.presentation.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
@@ -31,10 +30,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.painterResource
+import com.example.gymtop.R
 import com.example.gymtop.ui.theme.GymTopBackground
 import com.example.gymtop.ui.theme.GymTopNeonGreen
 import com.example.gymtop.ui.theme.GymTopOnPrimary
-import com.example.gymtop.ui.theme.GymTopSurface
 
 /**
  *
@@ -70,36 +70,12 @@ fun SplashScreen(
                 .padding(horizontal = 32.dp)
         ) {
 
-            // -- Circular logo with lightning bolt icon --
-            // GymTopSurface provides the dark fill; the border picks up NeonGreen
-            // at reduced opacity to create a subtle glowing ring effect.
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(144.dp)
-                    .clip(RoundedCornerShape(9999.dp))
-                    .background(GymTopSurface)
-                    .border(
-                        BorderStroke(1.5.dp, GymTopNeonGreen.copy(alpha = 0.35f)),
-                        RoundedCornerShape(9999.dp)
-                    )
-            ) {
-                // ⚡ lightning bolt as a Unicode glyph with a neon shadow.
-                // To use a vector icon instead, add material-icons-extended to
-                // build.gradle.kts and replace with:
-                //   Icon(Icons.Default.Bolt, contentDescription = null, tint = GymTopNeonGreen)
-                Text(
-                    text = "⚡",
-                    fontSize = 52.sp,
-                    style = TextStyle(
-                        shadow = Shadow(
-                            color = GymTopNeonGreen.copy(alpha = 0.6f),
-                            offset = Offset(0f, 0f),
-                            blurRadius = 28f
-                        )
-                    )
-                )
-            }
+            // -- Logo --
+            Image(
+                painter = painterResource(id = R.drawable.ic_gym_top_logo),
+                contentDescription = "Gym Top Logo",
+                modifier = Modifier.size(144.dp)
+            )
 
             Spacer(Modifier.height(40.dp))
 
