@@ -72,7 +72,10 @@ dependencies {
     
     // Hilt Navigation Compose
     implementation(libs.androidx.hilt.navigation.compose)
-    
+
+    // Lifecycle Runtime Compose (collectAsStateWithLifecycle)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
