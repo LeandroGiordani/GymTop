@@ -13,13 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,26 +38,23 @@ import com.example.gymtop.ui.theme.GymTopSurface
 
 /**
  *
- * All colors are imported from [com.example.gymtop.ui.theme.Color]
+ * All colors are imported from the theme.
  *
  * Visual structure (top → bottom):
- *  2. Centred column: circular logo  →  "GYM TOP" headline.
- *  3. Bottom section: "COMEÇAR →" CTA button  →  version footer.
+ *  1. Centred column: circular logo  →  "GYM TOP" headline.
+ *  2. Bottom section: "COMEÇAR →" and "ENTRAR" buttons  →  version footer.
  *
- * Improvements over [AnimatedSplashScreen] (v1):
- *  - Proper [Button] composable for the CTA.
- *  - Responsive layout: fillMaxSize + weight instead of hard-coded pixel sizes.
- *  - Stronger neon glow on the headline.
- *  - No dependency on R.drawable.container (uses ⚡ Unicode glyph; swap for
- *    Icons.Default.Bolt with material-icons-extended if a vector icon is preferred).
- *
+ * @param modifier The modifier to be applied to the layout.
  * @param onStartClick Callback fired when the user presses "COMEÇAR". Wire this
+ *                     to your NavController to push into the main app graph.
+ * @param onEnterClick Callback fired when the user presses "ENTRAR". Wire this
  *                     to your NavController to push into the main app graph.
  */
 @Composable
 fun SplashScreen(
+    modifier: Modifier = Modifier,
     onStartClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onEnterClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -162,13 +155,29 @@ fun SplashScreen(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.8.sp
                 )
-                Spacer(Modifier.width(12.dp))
-                // Arrow icon — available in the default Material icon set, no
-                // additional dependency needed.
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null, // label already describes the action
-                    modifier = Modifier.size(18.dp)
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // "ENTRAR" secondary call-to-action button
+            Button(
+                onClick = onEnterClick,
+                shape = RoundedCornerShape(9999.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                    contentColor = GymTopNeonGreen
+                ),
+                border = BorderStroke(1.dp, GymTopNeonGreen),
+                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Text(
+                    text = "ENTRAR",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.8.sp
                 )
             }
 
@@ -190,8 +199,8 @@ fun SplashScreen(
 // ── Preview ───────────────────────────────────────────────────────────────────
 @Preview(widthDp = 390, heightDp = 844)
 @Composable
-private fun SplashScreen2Preview() {
-    // onStartClick is left as a no-op for preview purposes
+private fun SplashScreenPreview() {
+    // onStartClick and onEnterClick are left as no-ops for preview purposes
     SplashScreen()
 }
 

@@ -88,7 +88,8 @@ fun NavGraph(
             }
 
             SplashScreen(
-                onStartClick = viewModel::onStartClicked
+                onStartClick = viewModel::onStartClicked,
+                onEnterClick = viewModel::onEnterClicked
             )
         }
 
