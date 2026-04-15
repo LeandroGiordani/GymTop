@@ -27,7 +27,7 @@ fun GymTopTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Set dynamicColor = false to always enforce the GymTop brand palette.
     // When true, Android 12+ devices may override colours with the system wallpaper.
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
