@@ -36,10 +36,15 @@ class ExerciseRepository(
      *
      * Como funciona o merge:
      * 1. DAO retorna Flow<List<ExerciseWithSets>> (banco de dados)
-     * 2. Para cada ExerciseWithSets, busca o LibraryExercise pelo libraryExerciseId
+     * 2. Para cada ExerciseWithSets, suspende e busca o LibraryExercise via Deferred.await()
      * 3. Chama toDomain(libraryExercise) para montar o Exercise completo
      *
-     * Exercícios cujo libraryExerciseId não exista no catálogo são ignorados (mapNotNull).
+     * Por que buildList em vez de mapNotNull?
+     * findById() é agora uma suspend fun — lambdas de coleções padrão (mapNotNull, map)
+     * não aceitam suspend. O bloco lambda de Flow.map{} SIM aceita suspend, portanto
+     * usamos buildList + for loop dentro dele para poder chamar findById() com suspend.
+     *
+     * Exercícios cujo libraryExerciseId não exista no catálogo são ignorados (continue).
      * Isso não deve ocorrer em uso normal, mas evita crashes se o JSON mudar.
      *
      * @param workoutId ID do treino
@@ -48,11 +53,16 @@ class ExerciseRepository(
     fun getExercisesByWorkoutId(workoutId: Long): Flow<List<Exercise>> {
         return exerciseDao.getExercisesWithSetsByWorkoutId(workoutId)
             .map { exercisesWithSets ->
-                exercisesWithSets.mapNotNull { withSets ->
-                    // Lookup O(1) no HashMap em memória
-                    val lib = libraryDataSource.findById(withSets.exerciseEntity.libraryExerciseId)
-                        ?: return@mapNotNull null
-                    withSets.toDomain(lib)
+                // buildList com for loop: permite chamar suspend fun findById() dentro do
+                // bloco suspend do Flow.map{}. mapNotNull{} não suporta suspend lambdas.
+                buildList {
+                    for (withSets in exercisesWithSets) {
+                        // Lookup O(1) no HashMap — suspende apenas se o JSON ainda está carregando
+                        val lib = libraryDataSource.findById(
+                            withSets.exerciseEntity.libraryExerciseId
+                        ) ?: continue  // ignora exercício se id não existe no catálogo
+                        add(withSets.toDomain(lib))
+                    }
                 }
             }
     }

@@ -2,8 +2,13 @@ package com.example.gymtop.data.datasource
 
 import android.content.Context
 import com.example.gymtop.R
+import com.example.gymtop.di.ApplicationScope
 import com.example.gymtop.domain.model.LibraryExercise
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,47 +22,65 @@ import javax.inject.Singleton
  * Não há operações de escrita nem múltiplas fontes de dados. É apenas uma leitura
  * de um arquivo estático — um DataSource puro é o nível certo de abstração.
  *
- * Estratégia de cache (by lazy):
- * O JSON (~1.2MB, 1156 exercícios) é lido e parseado UMA ÚNICA VEZ na primeira
- * chamada a findById() ou getAll(). O resultado é mantido em memória como um HashMap.
- * Como esta classe é @Singleton (via Hilt), o mapa persiste durante toda a vida do app.
+ * Estratégia de carregamento (Deferred / async):
+ * O JSON (~1.2MB) é lido e parseado em background (Dispatchers.IO) assim que este
+ * Singleton é criado pelo Hilt. O resultado fica disponível via [exerciseMapDeferred].
+ *
+ * Vantagem sobre "by lazy":
+ * Com "by lazy", o parsing ocorria na thread que fazia o primeiro acesso — potencialmente
+ * a Main Thread. Com Deferred + async(IO), o parsing SEMPRE ocorre em uma thread de I/O,
+ * e qualquer chamante apenas suspende (sem bloquear) enquanto aguarda o resultado.
  *
  * Custo: ~1–2MB de RAM, que é negligível em dispositivos Android modernos.
  *
- * TODO (melhoria futura): mover o loadLibrary() para um CoroutineScope de background
- * para evitar bloquear a thread que fizer o primeiro acesso. Por ora, o lazy é aceitável
- * para o MVP pois o app normalmente acessa a biblioteca a partir de uma coroutine.
- *
  * Padrão MVVM: Pertence ao Data Layer. Injetado no ExerciseRepository via Hilt.
  *
- * @param context ApplicationContext injetado pelo Hilt — necessário para abrir res/raw
+ * @param context  ApplicationContext injetado pelo Hilt — necessário para abrir res/raw
+ * @param appScope CoroutineScope de nível de aplicação injetado pelo Hilt via
+ *                 [com.example.gymtop.di.CoroutineScopeModule]. Garante que o carregamento
+ *                 do JSON não está atrelado ao ciclo de vida de nenhuma tela.
  */
 @Singleton
 class LibraryDataSource @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
+    @param:ApplicationScope private val appScope: CoroutineScope
 ) {
 
     /**
-     * Mapa de exercícios indexado pelo id do JSON (ex: "001", "043").
-     * Populado na primeira chamada — lazy initialization.
+     * Carregamento assíncrono iniciado imediatamente na criação do Singleton.
+     *
+     * async(Dispatchers.IO): garante que o I/O de disco e o parsing do JSON ocorrem
+     * em uma thread de I/O, nunca na Main Thread.
+     *
+     * Deferred<T>: funciona como um "Future" — o resultado fica disponível quando
+     * o async terminar. Chamadas a [findById] e [getAll] suspendem até que esteja pronto.
+     *
+     * SupervisorJob no appScope: se o carregamento falhar, o erro não se propaga para
+     * outros filhos do scope (isolamento de falhas).
      */
-    private val exerciseMap: Map<String, LibraryExercise> by lazy {
-        loadLibrary()
-    }
+    private val exerciseMapDeferred: Deferred<Map<String, LibraryExercise>> =
+        appScope.async(Dispatchers.IO) { loadLibrary() }
 
     /**
      * Busca um exercício pelo id do JSON.
+     *
+     * Suspende enquanto o carregamento inicial estiver em andamento (apenas na primeira
+     * chamada, e somente se o async ainda não terminou). Nas chamadas subsequentes,
+     * [exerciseMapDeferred] já está resolvido e await() retorna instantaneamente.
+     *
      * Retorna null se o id não existir no catálogo (não deve ocorrer em uso normal).
      *
-     * @param id  id do exercício no JSON, ex: "043"
+     * @param id id do exercício no JSON, ex: "043"
      */
-    fun findById(id: String): LibraryExercise? = exerciseMap[id]
+    suspend fun findById(id: String): LibraryExercise? = exerciseMapDeferred.await()[id]
 
     /**
      * Retorna todos os exercícios do catálogo, sem ordem garantida.
+     *
+     * Assim como [findById], suspende apenas se o carregamento ainda não terminou.
      * Útil para exibir a tela de busca/seleção de exercícios.
      */
-    fun getAll(): List<LibraryExercise> = exerciseMap.values.toList()
+    suspend fun getAll(): List<LibraryExercise> = exerciseMapDeferred.await().values.toList()
 
     // -------------------------------------------------------------------------
     // Parsing interno
@@ -65,6 +88,7 @@ class LibraryDataSource @Inject constructor(
 
     /**
      * Lê o arquivo res/raw/exercise_library.json e constrói o HashMap.
+     * Executado em Dispatchers.IO via [exerciseMapDeferred].
      *
      * Estrutura esperada no JSON:
      * {
