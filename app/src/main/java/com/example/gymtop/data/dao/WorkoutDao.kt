@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.Flow
  * Repositories usam DAOs, ViewModels usam Repositories.
  *
  * Flow: Observável reativo que emite novos valores quando os dados mudam no banco.
- * Quando o banco é atualizado, qualquer listener recebe automáticamente os novos dados.
+ * Quando o banco é atualizado, qualquer listener recebe automaticamente os novos dados.
  */
 @Dao
 interface WorkoutDao {
