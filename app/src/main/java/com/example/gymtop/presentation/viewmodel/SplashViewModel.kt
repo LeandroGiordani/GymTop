@@ -1,37 +1,25 @@
 package com.example.gymtop.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.gymtop.data.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
  * SplashViewModel — gerencia o estado e a navegação da SplashScreen.
  *
  * Responsabilidades:
- *  1. Verificar se o usuário já possui dados (treinos) no banco → "novo usuário" vs "retornante".
  *  2. Expor [SplashNavigationEvent] para a UI reagir e navegar sem conhecer o NavController.
- *  3. Expor [SplashUiState] com informações que a UI pode exibir (loading, hasExistingData).
- *
- * Por que recebe WorkoutRepository?
- *  A tela precisa saber se o banco já tem treinos para adaptar sua mensagem/fluxo.
- *  Futuramente, este é o lugar para verificar sessão de autenticação, preferências, etc.
  *
  * Padrão de navegação:
  *  O ViewModel NÃO conhece o NavController — ele apenas emite um [SplashNavigationEvent].
  *  A UI observa esse evento e chama o callback de navegação adequado.
  *  Após consumir o evento, a UI deve chamar [onNavigationEventConsumed] para limpar o estado.
  *
- * @param workoutRepository Repositório de treinos injetado pelo Hilt.
  */
 @HiltViewModel
-class SplashViewModel @Inject constructor(
-    private val workoutRepository: WorkoutRepository
-) : ViewModel() {
+class SplashViewModel @Inject constructor() : ViewModel() {
 
     // ── Navigation Events (one-shot) ───────────────────────────────────────────
     // StateFlow com valor nullable: null = nenhum evento pendente.
