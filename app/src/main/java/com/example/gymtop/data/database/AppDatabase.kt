@@ -31,7 +31,7 @@ import com.example.gymtop.data.entity.WorkoutEntity
  */
 @Database(
     entities = [WorkoutEntity::class, ExerciseEntity::class, SetEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
