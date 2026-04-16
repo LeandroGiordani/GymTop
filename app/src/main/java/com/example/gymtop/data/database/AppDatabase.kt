@@ -2,9 +2,11 @@ package com.example.gymtop.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.gymtop.data.dao.ExerciseDao
 import com.example.gymtop.data.dao.SetDao
 import com.example.gymtop.data.dao.WorkoutDao
+import com.example.gymtop.data.converter.Converters
 import com.example.gymtop.data.entity.ExerciseEntity
 import com.example.gymtop.data.entity.SetEntity
 import com.example.gymtop.data.entity.WorkoutEntity
@@ -34,6 +36,7 @@ import com.example.gymtop.data.entity.WorkoutEntity
     version = 2,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     /**
@@ -59,4 +62,3 @@ abstract class AppDatabase : RoomDatabase() {
      * abstract fun otherDao(): OtherDao
      */
 }
-
