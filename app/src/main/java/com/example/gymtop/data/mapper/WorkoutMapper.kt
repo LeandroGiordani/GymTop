@@ -1,5 +1,6 @@
 package com.example.gymtop.data.mapper
 
+import android.util.Log
 import com.example.gymtop.data.entity.ExerciseWithSets
 import com.example.gymtop.data.entity.WorkoutEntity
 import com.example.gymtop.data.entity.WorkoutWithExercisesAndSets
@@ -38,7 +39,13 @@ fun WorkoutWithExercisesAndSets.toDomain(
         description = workoutEntity.description,
         exercises = exercisesWithSets.mapNotNull { exerciseWithSets ->
             val lib = libraryMap[exerciseWithSets.exerciseEntity.libraryExerciseId]
-                ?: return@mapNotNull null  // ignora se id não existe no catálogo
+                ?: run {
+                    Log.w(
+                        "WorkoutMapper",
+                        "libraryExerciseId '${exerciseWithSets.exerciseEntity.libraryExerciseId}' not found in catalog — exercise omitted"
+                    )
+                    return@mapNotNull null  // ignora se id não existe no catálogo
+                }
             exerciseWithSets.toDomain(lib)
         }
     )
@@ -64,7 +71,7 @@ fun ExerciseWithSets.toDomain(libraryExercise: LibraryExercise): Exercise =
         libraryExercise = libraryExercise,
         sets = sets
             .sortedBy { it.setNumber }
-            .map { setEntity ->
+            .mapNotNull { setEntity ->
                 when (setEntity.type) {
                     "REPS" -> SetType.Reps(
                         count = setEntity.reps ?: 0,
@@ -73,8 +80,14 @@ fun ExerciseWithSets.toDomain(libraryExercise: LibraryExercise): Exercise =
                     "DURATION" -> SetType.Duration(
                         seconds = setEntity.duration ?: 0
                     )
-                    // Fallback para séries com type desconhecido (não deve ocorrer)
-                    else -> SetType.Duration(seconds = 0)
+                    else -> {
+                        Log.e(
+                            "WorkoutMapper",
+                            "Unknown SetType '${setEntity.type}' for set id=${setEntity.id} — skipping"
+                        )
+                        // In debug builds you may want: if (BuildConfig.DEBUG) throw IllegalStateException(...)
+                        null  // filter out with mapNotNull in the outer chain
+                    }
                 }
             }
     )
