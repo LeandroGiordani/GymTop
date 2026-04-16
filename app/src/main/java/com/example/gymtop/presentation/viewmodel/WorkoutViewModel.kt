@@ -2,7 +2,6 @@ package com.example.gymtop.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gymtop.data.entity.WorkoutEntity
 import com.example.gymtop.data.repository.WorkoutRepository
 import com.example.gymtop.domain.model.Workout
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -93,7 +92,7 @@ class WorkoutViewModel @Inject constructor(
      * TODO: Implementar quando UI estiver pronta
      * @param workout: Treino a ser inserido
      */
-    fun addWorkout(workout: WorkoutEntity) {
+    fun addWorkout(workout: Workout) {
         viewModelScope.launch {
             try {
                 // TODO: Validar dados antes de inserir
@@ -110,7 +109,7 @@ class WorkoutViewModel @Inject constructor(
      * TODO: Implementar quando UI estiver pronta
      * @param workout: Treino com dados atualizados
      */
-    fun updateWorkout(workout: WorkoutEntity) {
+    fun updateWorkout(workout: Workout) {
         viewModelScope.launch {
             try {
                 // TODO: Validar dados antes de atualizar
@@ -126,7 +125,7 @@ class WorkoutViewModel @Inject constructor(
      * TODO: Implementar quando UI estiver pronta
      * @param workout: Treino a ser deletado
      */
-    fun deleteWorkout(workout: WorkoutEntity) {
+    fun deleteWorkout(workout: Workout) {
         viewModelScope.launch {
             try {
                 workoutRepository.deleteWorkout(workout)

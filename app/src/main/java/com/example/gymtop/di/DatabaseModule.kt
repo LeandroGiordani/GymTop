@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.gymtop.data.database.AppDatabase
 import com.example.gymtop.data.dao.WorkoutDao
 import com.example.gymtop.data.dao.ExerciseDao
+import com.example.gymtop.data.dao.SetDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -79,6 +80,15 @@ object DatabaseModule {
     @Singleton
     fun provideExerciseDao(database: AppDatabase): ExerciseDao {
         return database.exerciseDao()
+    }
+
+    /**
+     * Fornece o SetDao extraído do AppDatabase
+     */
+    @Provides
+    @Singleton
+    fun provideSetDao(database: AppDatabase): SetDao {
+        return database.setDao()
     }
 
     /**

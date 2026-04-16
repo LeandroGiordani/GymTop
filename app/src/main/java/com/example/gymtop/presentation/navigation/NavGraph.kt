@@ -1,12 +1,17 @@
 package com.example.gymtop.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.gymtop.presentation.ui.screens.WorkoutListScreen
+import com.example.gymtop.presentation.ui.screens.SplashScreen
 import com.example.gymtop.presentation.ui.screens.WorkoutDetailScreen
+import com.example.gymtop.presentation.ui.screens.WorkoutListScreen
+import com.example.gymtop.presentation.viewmodel.SplashNavigationEvent
+import com.example.gymtop.presentation.viewmodel.SplashViewModel
 
 /**
  * NavGraph - Define a estrutura de navegação do app
@@ -31,6 +36,7 @@ import com.example.gymtop.presentation.ui.screens.WorkoutDetailScreen
  * Objeto selado garante type safety
  */
 sealed class Screens(val route: String) {
+    object Splash : Screens("splash")
     object WorkoutList : Screens("workout_list")
     object WorkoutDetail : Screens("workout_detail/{workoutId}") {
         fun createRoute(workoutId: Long) = "workout_detail/$workoutId"
@@ -60,8 +66,30 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screens.WorkoutList.route
+        startDestination = Screens.Splash.route
     ) {
+        // Rota: Splash / onboarding
+        composable(route = Screens.Splash.route) {
+            val viewModel: SplashViewModel = hiltViewModel()
+
+            LaunchedEffect(Unit) {
+                viewModel.navigationEvent.collect { event ->
+                    when (event) {
+                        SplashNavigationEvent.NavigateToWorkoutList -> {
+                            navController.navigate(Screens.WorkoutList.route) {
+                                popUpTo(Screens.Splash.route) { inclusive = true }
+                            }
+                        }
+                    }
+                }
+            }
+
+            SplashScreen(
+                onStartClick = viewModel::onStartClicked,
+                onEnterClick = viewModel::onEnterClicked
+            )
+        }
+
         // Rota: Tela de lista de treinos
         composable(route = Screens.WorkoutList.route) {
             WorkoutListScreen(

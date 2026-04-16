@@ -2,9 +2,13 @@ package com.example.gymtop.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.gymtop.data.dao.ExerciseDao
+import com.example.gymtop.data.dao.SetDao
 import com.example.gymtop.data.dao.WorkoutDao
+import com.example.gymtop.data.converter.Converters
 import com.example.gymtop.data.entity.ExerciseEntity
+import com.example.gymtop.data.entity.SetEntity
 import com.example.gymtop.data.entity.WorkoutEntity
 
 /**
@@ -28,10 +32,11 @@ import com.example.gymtop.data.entity.WorkoutEntity
  * Por enquanto, utilizamos fallbackToDestructiveMigration (apaga e recria - apenas para dev).
  */
 @Database(
-    entities = [WorkoutEntity::class, ExerciseEntity::class],
-    version = 1,
+    entities = [WorkoutEntity::class, ExerciseEntity::class, SetEntity::class],
+    version = 2,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     /**
@@ -47,8 +52,13 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun exerciseDao(): ExerciseDao
 
     /**
+     * Função abstrata que retorna a instância do SetDao.
+     * Room implementa automaticamente este método.
+     */
+    abstract fun setDao(): SetDao
+
+    /**
      * TODO: Quando adicionar mais DAOs, criar funções abstratas aqui
      * abstract fun otherDao(): OtherDao
      */
 }
-

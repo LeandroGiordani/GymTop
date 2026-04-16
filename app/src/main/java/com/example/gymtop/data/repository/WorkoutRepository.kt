@@ -2,6 +2,8 @@ package com.example.gymtop.data.repository
 
 import com.example.gymtop.data.dao.WorkoutDao
 import com.example.gymtop.data.entity.WorkoutEntity
+import com.example.gymtop.data.mapper.toDomain
+import com.example.gymtop.data.mapper.toEntity
 import com.example.gymtop.domain.model.Workout
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -34,36 +36,36 @@ class WorkoutRepository(
     fun getAllWorkouts(): Flow<List<Workout>> {
         // TODO: Implementar lógica adicional se necessário
         // Exemplo: transformação de dados, logging, tratamento de erros
-        return workoutDao.getAllWorkouts().map { it.toDomain() }
+        return workoutDao.getAllWorkouts().map { list -> list.map { entity -> entity.toDomain() } }
     }
 
     /**
      * Insere um novo treino de forma assíncrona
      * @param workout: Objeto treino a ser inserido
      */
-    suspend fun insertWorkout(workout: WorkoutEntity) {
+    suspend fun insertWorkout(workout: Workout) {
         // TODO: Adicionar validação de dados
         // Exemplo: verificar se nome não está vazio, se data é válida, etc.
-        workoutDao.insert(workout)
+        workoutDao.insert(workout.toEntity())
     }
 
     /**
      * Atualiza um treino existente
      * @param workout: Objeto treino com dados atualizados
      */
-    suspend fun updateWorkout(workout: WorkoutEntity) {
+    suspend fun updateWorkout(workout: Workout) {
         // TODO: Adicionar validação de dados
-        workoutDao.update(workout)
+        workoutDao.update(workout.toEntity())
     }
 
     /**
      * Deleta um treino
      * @param workout: Objeto treino a ser deletado
      */
-    suspend fun deleteWorkout(workout: WorkoutEntity) {
+    suspend fun deleteWorkout(workout: Workout) {
         // TODO: Adicionar confirmação antes de deletar (se necessário)
         // TODO: Adicionar logging de deleção
-        workoutDao.delete(workout)
+        workoutDao.delete(workout.toEntity())
     }
 
     /**
