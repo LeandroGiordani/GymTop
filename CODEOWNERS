@@ -2,19 +2,19 @@
 # More info about CODEOWNERS: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Default owner for all files
-* @LeandroGiordani
+* @LeandroGiordani @ninacoelhodr
 
 # Android app specific files
-/app/ @LeandroGiordani
-/gradle/ @LeandroGiordani
-*.gradle.kts @LeandroGiordani
+/app/ @LeandroGiordani @ninacoelhodr
+/gradle/ @LeandroGiordani @ninacoelhodr
+*.gradle.kts @LeandroGiordani @ninacoelhodr
 
 # Build and dependency files
-build.gradle.kts @LeandroGiordani
-settings.gradle.kts @LeandroGiordani
-gradle.properties @LeandroGiordani
+build.gradle.kts @LeandroGiordani @ninacoelhodr
+settings.gradle.kts @LeandroGiordani @ninacoelhodr
+gradle.properties @LeandroGiordani @ninacoelhodr
 
 # Configuration files
-.gitignore @LeandroGiordani
-.github/ @LeandroGiordani
+.gitignore @LeandroGiordani @ninacoelhodr
+.github/ @LeandroGiordani @ninacoelhodr
 
