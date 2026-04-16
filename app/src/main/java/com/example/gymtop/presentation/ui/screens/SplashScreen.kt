@@ -46,8 +46,6 @@ import com.example.gymtop.ui.theme.GymTopOnPrimary
  *  • Two equal [Spacer]s with `weight(1f)` sandwich the logo + headline block,
  *    pinning it at vertical centre — just like a 50 % horizontal guideline.
  *  • Buttons and the footer live below the second spacer, always at the bottom.
- *  • [navigationBarsPadding] ensures content is never hidden behind the
- *    system navigation bar (required because MainActivity calls enableEdgeToEdge).
  *
  * @param modifier     Standard Compose modifier forwarded to the root layout.
  * @param onStartClick Callback for the primary "COMEÇAR" button.
