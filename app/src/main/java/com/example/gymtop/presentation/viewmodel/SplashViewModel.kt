@@ -1,9 +1,11 @@
 package com.example.gymtop.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -15,7 +17,6 @@ import javax.inject.Inject
  * Padrão de navegação:
  *  O ViewModel NÃO conhece o NavController — ele apenas emite um [SplashNavigationEvent].
  *  A UI observa esse evento e chama o callback de navegação adequado.
- *  Após consumir o evento, a UI deve chamar [onNavigationEventConsumed] para limpar o estado.
  *
  */
 @HiltViewModel
@@ -25,8 +26,8 @@ class SplashViewModel @Inject constructor() : ViewModel() {
     // StateFlow com valor nullable: null = nenhum evento pendente.
     // A UI lê o evento, navega, e chama onNavigationEventConsumed() para limpar.
 
-    private val _navigationEvent = MutableStateFlow<SplashNavigationEvent?>(null)
-    val navigationEvent: StateFlow<SplashNavigationEvent?> = _navigationEvent
+    private val _navigationEvent = Channel<SplashNavigationEvent>(Channel.BUFFERED)
+    val navigationEvent = _navigationEvent.receiveAsFlow()
 
     // ── User Actions ───────────────────────────────────────────────────────────
 
@@ -36,7 +37,7 @@ class SplashViewModel @Inject constructor() : ViewModel() {
      * TODO: redirecionar para tela de onboarding quando ela existir.
      */
     fun onStartClicked() {
-        _navigationEvent.value = SplashNavigationEvent.NavigateToWorkoutList
+        viewModelScope.launch { _navigationEvent.send(SplashNavigationEvent.NavigateToWorkoutList) }
     }
 
     /**
@@ -45,15 +46,7 @@ class SplashViewModel @Inject constructor() : ViewModel() {
      * TODO: redirecionar para tela de login quando autenticação for adicionada.
      */
     fun onEnterClicked() {
-        _navigationEvent.value = SplashNavigationEvent.NavigateToWorkoutList
-    }
-
-    /**
-     * Deve ser chamado pela UI logo após consumir um [SplashNavigationEvent],
-     * para evitar que o mesmo evento seja processado novamente em recomposições.
-     */
-    fun onNavigationEventConsumed() {
-        _navigationEvent.value = null
+        viewModelScope.launch { _navigationEvent.send(SplashNavigationEvent.NavigateToWorkoutList) }
     }
 }
 

@@ -2,9 +2,7 @@ package com.example.gymtop.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -73,17 +71,16 @@ fun NavGraph(
         // Rota: Splash / onboarding
         composable(route = Screens.Splash.route) {
             val viewModel: SplashViewModel = hiltViewModel()
-            val navigationEvent by viewModel.navigationEvent.collectAsStateWithLifecycle()
 
-            LaunchedEffect(navigationEvent) {
-                when (navigationEvent) {
-                    SplashNavigationEvent.NavigateToWorkoutList -> {
-                        navController.navigate(Screens.WorkoutList.route) {
-                            popUpTo(Screens.Splash.route) { inclusive = true }
+            LaunchedEffect(Unit) {
+                viewModel.navigationEvent.collect { event ->
+                    when (event) {
+                        SplashNavigationEvent.NavigateToWorkoutList -> {
+                            navController.navigate(Screens.WorkoutList.route) {
+                                popUpTo(Screens.Splash.route) { inclusive = true }
+                            }
                         }
-                        viewModel.onNavigationEventConsumed()
                     }
-                    null -> Unit
                 }
             }
 
