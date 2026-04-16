@@ -23,8 +23,8 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor() : ViewModel() {
 
     // ── Navigation Events (one-shot) ───────────────────────────────────────────
-    // StateFlow com valor nullable: null = nenhum evento pendente.
-    // A UI lê o evento, navega, e chama onNavigationEventConsumed() para limpar.
+    // Channel + receiveAsFlow para eventos one-shot de navegação.
+    // A UI coleta o fluxo e reage a cada evento emitido.
 
     private val _navigationEvent = Channel<SplashNavigationEvent>(Channel.BUFFERED)
     val navigationEvent = _navigationEvent.receiveAsFlow()
