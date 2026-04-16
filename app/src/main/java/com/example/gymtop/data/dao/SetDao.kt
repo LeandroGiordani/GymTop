@@ -1,5 +1,6 @@
 package com.example.gymtop.data.dao
 
+import androidx.annotation.WorkerThread
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -27,9 +28,11 @@ interface SetDao {
 
     /**
      * Insere múltiplas séries em uma transação
-     * @param sets: Lista de séries a inserir
+     * @param sets Lista de séries a inserir
+     * @return List<Long> IDs gerados pelo banco para cada série, na ordem de inserção
      */
     @Insert
+    @WorkerThread
     suspend fun insertMultiple(sets: List<SetEntity>): List<Long>
 
     /**
