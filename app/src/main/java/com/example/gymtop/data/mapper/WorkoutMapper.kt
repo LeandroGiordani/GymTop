@@ -7,6 +7,7 @@ import com.example.gymtop.data.entity.WorkoutWithExercisesAndSets
 import com.example.gymtop.domain.model.Exercise
 import com.example.gymtop.domain.model.LibraryExercise
 import com.example.gymtop.domain.model.SetType
+import com.example.gymtop.domain.model.SetTypeValue
 import com.example.gymtop.domain.model.Workout
 
 /**
@@ -71,23 +72,15 @@ fun ExerciseWithSets.toDomain(libraryExercise: LibraryExercise): Exercise =
         libraryExercise = libraryExercise,
         sets = sets
             .sortedBy { it.setNumber }
-            .mapNotNull { setEntity ->
+            .map { setEntity ->
                 when (setEntity.type) {
-                    "REPS" -> SetType.Reps(
+                    SetTypeValue.REPS -> SetType.Reps(
                         count = setEntity.reps ?: 0,
                         weight = setEntity.weight
                     )
-                    "DURATION" -> SetType.Duration(
+                    SetTypeValue.DURATION -> SetType.Duration(
                         seconds = setEntity.duration ?: 0
                     )
-                    else -> {
-                        Log.e(
-                            "WorkoutMapper",
-                            "Unknown SetType '${setEntity.type}' for set id=${setEntity.id} — skipping"
-                        )
-                        // In debug builds you may want: if (BuildConfig.DEBUG) throw IllegalStateException(...)
-                        null  // filter out with mapNotNull in the outer chain
-                    }
                 }
             }
     )
