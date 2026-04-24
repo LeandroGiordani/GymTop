@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    // Processes google-services.json and configures Firebase at build time
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -50,7 +52,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    
+    // Extended icons (Visibility, VisibilityOff, etc.) — not bundled in the core icon set
+    implementation(libs.androidx.compose.material.icons.extended)
+
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
@@ -69,12 +73,24 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
-    
+    // .await() extension for Firebase Tasks — bridges Firebase callbacks to coroutines
+    implementation(libs.kotlinx.coroutines.play.services)
+
     // Hilt Navigation Compose
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Lifecycle Runtime Compose (collectAsStateWithLifecycle)
     implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // ── Firebase ──────────────────────────────────────────────────────────────
+    // BOM controls all Firebase versions — no need to pin each one individually
+    implementation(platform(libs.firebase.bom))
+    // Firebase Authentication (email/password + Google Sign-In credential)
+    implementation(libs.firebase.auth)
+    // Cloud Firestore — stores user profile (name, gender) beyond what Auth provides
+    implementation(libs.firebase.firestore)
+    // Google Sign-In — provides the ID token passed to Firebase Auth
+    implementation(libs.play.services.auth)
 
     // Testing
     testImplementation(libs.junit)

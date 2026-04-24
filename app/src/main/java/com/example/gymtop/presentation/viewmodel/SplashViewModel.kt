@@ -2,6 +2,7 @@ package com.example.gymtop.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gymtop.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -12,41 +13,60 @@ import javax.inject.Inject
  * SplashViewModel — gerencia o estado e a navegação da SplashScreen.
  *
  * Responsabilidades:
- *  2. Expor [SplashNavigationEvent] para a UI reagir e navegar sem conhecer o NavController.
+ *  1. Ao inicializar, verificar se há usuário autenticado via [AuthRepository].
+ *     - Se sim → emite [SplashNavigationEvent.NavigateToWorkoutList] (login persistido).
+ *     - Se não → aguarda ação do usuário nos botões da tela.
+ *  2. Expor [SplashNavigationEvent] para a UI reagir e navegar.
  *
  * Padrão de navegação:
- *  O ViewModel NÃO conhece o NavController — ele apenas emite um [SplashNavigationEvent].
- *  A UI observa esse evento e chama o callback de navegação adequado.
+ *  O ViewModel NÃO conhece o NavController — apenas emite eventos.
+ *  A UI (NavGraph) observa e navega.
  *
+ * @param authRepository Injetado pelo Hilt; verifica sessão ativa no Firebase.
  */
 @HiltViewModel
-class SplashViewModel @Inject constructor() : ViewModel() {
-
-    // ── Navigation Events (one-shot) ───────────────────────────────────────────
-    // Channel + receiveAsFlow para eventos one-shot de navegação.
-    // A UI coleta o fluxo e reage a cada evento emitido.
+class SplashViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _navigationEvent = Channel<SplashNavigationEvent>(Channel.BUFFERED)
     val navigationEvent = _navigationEvent.receiveAsFlow()
 
+    // ── Init: check persistent session ────────────────────────────────────────
+
+    init {
+        // Verifica sessão ao inicializar: se o usuário já estava logado,
+        // navega diretamente para o app sem passar pelo onboarding.
+        viewModelScope.launch {
+            val loggedInUser = authRepository.getCurrentUser()
+            if (loggedInUser != null) {
+                _navigationEvent.send(SplashNavigationEvent.NavigateToWorkoutList)
+            }
+            // Se null: a SplashScreen permanece visível aguardando ação do usuário.
+        }
+    }
+
     // ── User Actions ───────────────────────────────────────────────────────────
 
     /**
-     * Chamado quando o usuário pressiona "COMEÇAR" (novo usuário / onboarding).
-     * Atualmente navega direto para a lista de treinos.
-     * TODO: redirecionar para tela de onboarding quando ela existir.
+     * Chamado quando o usuário pressiona "COMEÇAR" (novo usuário).
+     * Direciona para o fluxo de onboarding (cadastro).
      */
     fun onStartClicked() {
-        viewModelScope.launch { _navigationEvent.send(SplashNavigationEvent.NavigateToWorkoutList) }
+        viewModelScope.launch {
+            _navigationEvent.send(SplashNavigationEvent.NavigateToOnboarding)
+        }
     }
 
     /**
-     * Chamado quando o usuário pressiona "ENTRAR" (usuário retornante / login).
-     * Atualmente navega para a lista de treinos enquanto autenticação não está implementada.
-     * TODO: redirecionar para tela de login quando autenticação for adicionada.
+     * Chamado quando o usuário pressiona "ENTRAR" (usuário retornante).
+     * TODO: redirecionar para tela de Login quando ela for implementada.
+     * Por ora, vai para o app principal como placeholder.
      */
     fun onEnterClicked() {
-        viewModelScope.launch { _navigationEvent.send(SplashNavigationEvent.NavigateToWorkoutList) }
+        viewModelScope.launch {
+            _navigationEvent.send(SplashNavigationEvent.NavigateToWorkoutList)
+        }
     }
 }
 
@@ -60,12 +80,9 @@ class SplashViewModel @Inject constructor() : ViewModel() {
  * explicitamente no `when` da UI (type-safety).
  */
 sealed class SplashNavigationEvent {
-    /** Navegar para a lista de treinos (destino principal do app). */
+    /** Usuário já autenticado ou retornante — vai para o app principal. */
     object NavigateToWorkoutList : SplashNavigationEvent()
 
-    // TODO: adicionar quando autenticação for implementada
-    // object NavigateToLogin : SplashNavigationEvent()
-
-    // TODO: adicionar quando tela de onboarding for implementada
-    // object NavigateToOnboarding : SplashNavigationEvent()
+    /** Novo usuário — inicia o fluxo de cadastro (OnboardingInfoScreen). */
+    object NavigateToOnboarding : SplashNavigationEvent()
 }
