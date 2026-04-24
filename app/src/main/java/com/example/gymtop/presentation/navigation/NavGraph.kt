@@ -90,15 +90,11 @@ fun NavGraph(
                     when (event) {
                         // Usuário retornante — já autenticado, vai direto para o app
                         SplashNavigationEvent.NavigateToWorkoutList -> {
-                            navController.navigate(Screens.WorkoutList.route) {
-                                popUpTo(Screens.Splash.route) { inclusive = true }
-                            }
+                            navController.navigate(Screens.WorkoutList.route)
                         }
                         // Novo usuário — inicia o fluxo de onboarding (cadastro)
                         SplashNavigationEvent.NavigateToOnboarding -> {
-                            navController.navigate(Screens.OnboardingInfo.route) {
-                                popUpTo(Screens.Splash.route) { inclusive = true }
-                            }
+                            navController.navigate(Screens.OnboardingInfo.route)
                         }
                     }
                 }
