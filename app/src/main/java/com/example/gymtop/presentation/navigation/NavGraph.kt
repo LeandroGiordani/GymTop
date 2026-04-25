@@ -118,6 +118,7 @@ fun NavGraph(
             val uiState by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
+                viewModel.clearError()
                 viewModel.navigationEvent.collect { event ->
                     when (event) {
                         OnboardingNavigationEvent.NavigateToCreatePassword -> {

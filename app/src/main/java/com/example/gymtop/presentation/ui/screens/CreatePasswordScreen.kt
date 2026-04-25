@@ -9,17 +9,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -54,7 +53,7 @@ import com.example.gymtop.ui.theme.GymTopSurface
  *  - Subtítulo com instrução mínima
  *  - Campo "Senha" com ícone de cadeado e toggle de visibilidade
  *  - Campo "Confirmar Senha" com mesmos controles
- *  - FAB com seta no canto inferior esquerdo para criar a conta
+ *  - Botão primário "CRIAR CONTA" abaixo dos campos para submeter o formulário
  *  - Indicador de loading enquanto a chamada ao Firebase está em andamento
  *
  * @param password            Valor atual do campo Senha.
@@ -219,32 +218,36 @@ fun CreatePasswordScreen(
                 color = Color.White.copy(alpha = 0.3f),
                 fontSize = 11.sp
             )
-        }
 
-        // ── FAB / Loading indicator ────────────────────────────────────────────
-        // Enquanto isLoading = true, exibe um spinner no lugar do FAB para
-        // evitar que o usuário envie o formulário mais de uma vez.
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(24.dp)
-                .size(64.dp)
-        ) {
+            Spacer(Modifier.height(32.dp))
+
+            // ── Primary CTA button ─────────────────────────────────────────────
+            // Enquanto isLoading = true, exibe um spinner centralizado no lugar
+            // do botão para evitar que o usuário envie o formulário mais de uma vez.
             if (isLoading) {
-                CircularProgressIndicator(color = GymTopNeonGreen)
-            } else {
-                FloatingActionButton(
-                    onClick = onCreateAccountClicked,
-                    containerColor = GymTopNeonGreen,
-                    contentColor = GymTopOnPrimary,
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.size(64.dp)
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Criar conta",
-                        modifier = Modifier.size(28.dp)
+                    CircularProgressIndicator(color = GymTopNeonGreen)
+                }
+            } else {
+                Button(
+                    onClick = onCreateAccountClicked,
+                    shape = RoundedCornerShape(9999.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GymTopNeonGreen,
+                        contentColor   = GymTopOnPrimary
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                ) {
+                    Text(
+                        text       = "CRIAR CONTA",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.8.sp
                     )
                 }
             }
