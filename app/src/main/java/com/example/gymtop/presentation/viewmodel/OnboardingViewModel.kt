@@ -51,8 +51,8 @@ sealed class OnboardingNavigationEvent {
     /** Avança da tela de informações para a tela de criação de senha. */
     object NavigateToCreatePassword : OnboardingNavigationEvent()
 
-    /** Cadastro concluído — vai para a lista de treinos (app principal). */
-    object NavigateToWorkoutList : OnboardingNavigationEvent()
+    /** Cadastro concluído — redireciona para o login para o usuário autenticar. */
+    object NavigateToLogin : OnboardingNavigationEvent()
 }
 
 // ── ViewModel ─────────────────────────────────────────────────────────────────
@@ -139,7 +139,9 @@ class OnboardingViewModel @Inject constructor(
 
                 result.fold(
                     onSuccess = {
-                        _navigationEvent.send(OnboardingNavigationEvent.NavigateToWorkoutList)
+                        // Conta criada com sucesso — envia o usuário para o login
+                        // para que ele autentique com as credenciais recém-criadas.
+                        _navigationEvent.send(OnboardingNavigationEvent.NavigateToLogin)
                     },
                     onFailure = { error ->
                         _uiState.update {

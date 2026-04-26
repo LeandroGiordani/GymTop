@@ -5,6 +5,7 @@ import com.example.gymtop.domain.model.User
 import com.example.gymtop.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -27,7 +28,7 @@ import javax.inject.Inject
  */
 class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+//    private val firestore: FirebaseFirestore
 ) : AuthRepository {
 
     // ── Firestore collection name constant ─────────────────────────────────────
@@ -42,8 +43,9 @@ class AuthRepositoryImpl @Inject constructor(
      * Retorna null se não há usuário logado ou se o perfil Firestore não existe.
      */
     override suspend fun getCurrentUser(): User? {
-        val firebaseUser = firebaseAuth.currentUser ?: return null
-        return fetchUserProfile(firebaseUser.uid)
+//        val firebaseUser = firebaseAuth.currentUser ?: return null
+//        return fetchUserProfile(firebaseUser.uid)
+        return firebaseAuth.currentUser?.toUser()
     }
 
     // ── createAccountWithEmail ─────────────────────────────────────────────────
@@ -64,19 +66,47 @@ class AuthRepositoryImpl @Inject constructor(
             .createUserWithEmailAndPassword(email, password)
             .await()
 
-        val uid = authResult.user?.uid
+//        val uid = authResult.user?.uid
+        val firebaseUser = authResult.user
             ?: error("Firebase Auth não retornou UID após criação de conta.")
 
         // Firestore: salva o perfil com os dados extras (name, gender)
-        val profile = mapOf(
-            "name"   to name,
-            "email"  to email,
-            "gender" to gender.name   // armazena o nome do enum (ex: "FEMININO")
-        )
-        firestore.collection(USERS_COLLECTION).document(uid).set(profile).await()
+//        val profile = mapOf(
+//            "name"   to name,
+//            "email"  to email,
+//            "gender" to gender.name   // armazena o nome do enum (ex: "FEMININO")
+//        )
+//        firestore.collection(USERS_COLLECTION).document(uid).set(profile).await()
 
-        User(uid = uid, name = name, email = email, gender = gender)
+        val profileUpdate = UserProfileChangeRequest.Builder()
+            .setDisplayName(name)
+            .build()
+        firebaseUser.updateProfile(profileUpdate).await()
+
+//        User(uid = uid, name = name, email = email, gender = gender)
+        firebaseUser.toUser()
     }
+
+    // ── signInWithEmail ────────────────────────────────────────────────────────
+
+    /**
+     * Autentica com e-mail e senha em uma conta já existente.
+     * Busca o perfil completo no Firestore após autenticação bem-sucedida.
+     */
+    override suspend fun signInWithEmail(email: String, password: String): Result<User> =
+        runCatching {
+            val authResult = firebaseAuth
+                .signInWithEmailAndPassword(email, password)
+                .await()
+
+//            val uid = authResult.user?.uid
+//                ?: error("Firebase Auth não retornou UID após login.")
+//
+//            fetchUserProfile(uid)
+//                ?: User(uid = uid, name = "", email = email, gender = Gender.OUTRO)
+            authResult.user?.toUser()
+                ?: error("Firebase Auth não retornou usuário após login.")
+        }
 
     // ── signInWithGoogle ───────────────────────────────────────────────────────
 
@@ -97,22 +127,23 @@ class AuthRepositoryImpl @Inject constructor(
             ?: error("Firebase não retornou usuário após login com Google.")
 
         // Verifica se o perfil já existe no Firestore (login recorrente)
-        val existingProfile = fetchUserProfile(firebaseUser.uid)
-        if (existingProfile != null) return@runCatching existingProfile
+//        val existingProfile = fetchUserProfile(firebaseUser.uid)
+//        if (existingProfile != null) return@runCatching existingProfile
 
         // Primeiro login com Google: cria perfil no Firestore
-        val name   = firebaseUser.displayName ?: ""
-        val email  = firebaseUser.email ?: ""
-        val gender = Gender.OUTRO  // padrão; usuário pode atualizar depois
+//        val name   = firebaseUser.displayName ?: ""
+//        val email  = firebaseUser.email ?: ""
+//        val gender = Gender.OUTRO  // padrão; usuário pode atualizar depois
 
-        val profile = mapOf(
-            "name"   to name,
-            "email"  to email,
-            "gender" to gender.name
-        )
-        firestore.collection(USERS_COLLECTION).document(firebaseUser.uid).set(profile).await()
-
-        User(uid = firebaseUser.uid, name = name, email = email, gender = gender)
+//        val profile = mapOf(
+//            "name"   to name,
+//            "email"  to email,
+//            "gender" to gender.name
+//        )
+//        firestore.collection(USERS_COLLECTION).document(firebaseUser.uid).set(profile).await()
+//
+//        User(uid = firebaseUser.uid, name = name, email = email, gender = gender)
+        firebaseUser.toUser()
     }
 
     // ── signOut ────────────────────────────────────────────────────────────────
@@ -128,16 +159,27 @@ class AuthRepositoryImpl @Inject constructor(
      * Mapeia os campos do documento para o modelo de domínio [User].
      * Retorna null se o documento não existir.
      */
-    private suspend fun fetchUserProfile(uid: String): User? {
-        val doc = firestore.collection(USERS_COLLECTION).document(uid).get().await()
-        if (!doc.exists()) return null
+//    private suspend fun fetchUserProfile(uid: String): User? {
+//        val doc = firestore.collection(USERS_COLLECTION).document(uid).get().await()
+//        if (!doc.exists()) return null
+//
+//        val name   = doc.getString("name") ?: ""
+//        val email  = doc.getString("email") ?: ""
+//        val genderStr = doc.getString("gender") ?: Gender.OUTRO.name
+//        val gender = runCatching { Gender.valueOf(genderStr) }.getOrDefault(Gender.OUTRO)
+//
+//        return User(uid = uid, name = name, email = email, gender = gender)
+//    }
 
-        val name   = doc.getString("name") ?: ""
-        val email  = doc.getString("email") ?: ""
-        val genderStr = doc.getString("gender") ?: Gender.OUTRO.name
-        val gender = runCatching { Gender.valueOf(genderStr) }.getOrDefault(Gender.OUTRO)
-
-        return User(uid = uid, name = name, email = email, gender = gender)
-    }
+    /**
+     * Extensão para converter [com.google.firebase.auth.FirebaseUser] no modelo
+     * de domínio [User].
+     * Gender sempre retorna [Gender.OUTRO] pois Firebase Auth não armazena esse campo.
+     */
+    private fun com.google.firebase.auth.FirebaseUser.toUser() = User(
+        uid    = uid,
+        name   = displayName ?: "",
+        email  = email ?: "",
+        gender = Gender.OUTRO   // Firebase Auth não suporta campos customizados
+    )
 }
-

@@ -11,10 +11,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.gymtop.presentation.ui.screens.CreatePasswordScreen
+import com.example.gymtop.presentation.ui.screens.LoginScreen
 import com.example.gymtop.presentation.ui.screens.OnboardingInfoScreen
 import com.example.gymtop.presentation.ui.screens.SplashScreen
 import com.example.gymtop.presentation.ui.screens.WorkoutDetailScreen
 import com.example.gymtop.presentation.ui.screens.WorkoutListScreen
+import com.example.gymtop.presentation.viewmodel.LoginNavigationEvent
+import com.example.gymtop.presentation.viewmodel.LoginViewModel
 import com.example.gymtop.presentation.viewmodel.OnboardingNavigationEvent
 import com.example.gymtop.presentation.viewmodel.OnboardingViewModel
 import com.example.gymtop.presentation.viewmodel.SplashNavigationEvent
@@ -49,6 +52,8 @@ sealed class Screens(val route: String) {
     // Compartilham o mesmo OnboardingViewModel (hiltViewModel() no NavGraph).
     object OnboardingInfo   : Screens("onboarding_info")
     object CreatePassword   : Screens("create_password")
+    // ── Login ──────────────────────────────────────────────────────────────────
+    object Login            : Screens("login")
     // ── Main app ───────────────────────────────────────────────────────────────
     object WorkoutList : Screens("workout_list")
     object WorkoutDetail : Screens("workout_detail/{workoutId}") {
@@ -90,11 +95,17 @@ fun NavGraph(
                     when (event) {
                         // Usuário retornante — já autenticado, vai direto para o app
                         SplashNavigationEvent.NavigateToWorkoutList -> {
-                            navController.navigate(Screens.WorkoutList.route)
+                            navController.navigate(Screens.WorkoutList.route) {
+                                popUpTo(Screens.Splash.route) { inclusive = true }
+                            }
                         }
                         // Novo usuário — inicia o fluxo de onboarding (cadastro)
                         SplashNavigationEvent.NavigateToOnboarding -> {
                             navController.navigate(Screens.OnboardingInfo.route)
+                        }
+                        // Usuário retornante — vai para a tela de login
+                        SplashNavigationEvent.NavigateToLogin -> {
+                            navController.navigate(Screens.Login.route)
                         }
                     }
                 }
@@ -124,11 +135,9 @@ fun NavGraph(
                         OnboardingNavigationEvent.NavigateToCreatePassword -> {
                             navController.navigate(Screens.CreatePassword.route)
                         }
-                        OnboardingNavigationEvent.NavigateToWorkoutList -> {
-                            navController.navigate(Screens.WorkoutList.route) {
-                                popUpTo(Screens.OnboardingInfo.route) { inclusive = true }
-                            }
-                        }
+                        // NavigateToLogin não é esperado nesta tela, mas o when
+                        // precisa ser exaustivo — ignoramos silenciosamente.
+                        OnboardingNavigationEvent.NavigateToLogin -> Unit
                     }
                 }
             }
@@ -157,8 +166,10 @@ fun NavGraph(
 
             LaunchedEffect(Unit) {
                 viewModel.navigationEvent.collect { event ->
-                    if (event == OnboardingNavigationEvent.NavigateToWorkoutList) {
-                        navController.navigate(Screens.WorkoutList.route) {
+                    if (event == OnboardingNavigationEvent.NavigateToLogin) {
+                        // Cadastro concluído — remove todo o fluxo de onboarding
+                        // da back stack e envia o usuário para o login.
+                        navController.navigate(Screens.Login.route) {
                             popUpTo(Screens.OnboardingInfo.route) { inclusive = true }
                         }
                     }
@@ -173,6 +184,36 @@ fun NavGraph(
                 onPasswordChanged        = viewModel::onPasswordChanged,
                 onConfirmPasswordChanged = viewModel::onConfirmPasswordChanged,
                 onCreateAccountClicked   = viewModel::onCreateAccountClicked
+            )
+        }
+
+        // Rota: Tela de login (usuário retornante)
+        composable(route = Screens.Login.route) {
+            val viewModel: LoginViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.clearError()
+                viewModel.navigationEvent.collect { event ->
+                    when (event) {
+                        LoginNavigationEvent.NavigateToWorkoutList -> {
+                            // Remove toda a stack de auth ao entrar no app
+                            navController.navigate(Screens.WorkoutList.route) {
+                                popUpTo(Screens.Splash.route) { inclusive = true }
+                            }
+                        }
+                    }
+                }
+            }
+
+            LoginScreen(
+                email            = uiState.email,
+                password         = uiState.password,
+                isLoading        = uiState.isLoading,
+                errorMessage     = uiState.errorMessage,
+                onEmailChanged   = viewModel::onEmailChanged,
+                onPasswordChanged= viewModel::onPasswordChanged,
+                onLoginClicked   = viewModel::onLoginClicked
             )
         }
 

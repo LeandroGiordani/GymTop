@@ -37,6 +37,13 @@ interface AuthRepository {
     ): Result<User>
 
     /**
+     * Autentica com e-mail e senha em uma conta já existente.
+     *
+     * @return [Result.success] com o [User] autenticado, ou [Result.failure] com a exceção.
+     */
+    suspend fun signInWithEmail(email: String, password: String): Result<User>
+
+    /**
      * Autentica usando um Google ID Token obtido pelo GoogleSignInClient.
      * O token é trocado por uma credencial do Firebase Auth.
      * Se for o primeiro login, o perfil do usuário é criado no Firestore.

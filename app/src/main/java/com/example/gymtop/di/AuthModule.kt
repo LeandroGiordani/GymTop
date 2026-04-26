@@ -41,9 +41,9 @@ object FirebaseProviders {
      * Fornece a instância singleton do FirebaseFirestore.
      * Usado pelo AuthRepositoryImpl para ler/escrever perfis de usuário.
      */
-    @Provides
-    @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+//    @Provides
+//    @Singleton
+//    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
 }
 
 /**

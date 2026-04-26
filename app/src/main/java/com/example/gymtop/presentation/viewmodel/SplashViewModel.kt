@@ -60,12 +60,11 @@ class SplashViewModel @Inject constructor(
 
     /**
      * Chamado quando o usuário pressiona "ENTRAR" (usuário retornante).
-     * TODO: redirecionar para tela de Login quando ela for implementada.
-     * Por ora, vai para o app principal como placeholder.
+     * Navega para a tela de login.
      */
     fun onEnterClicked() {
         viewModelScope.launch {
-            _navigationEvent.send(SplashNavigationEvent.NavigateToWorkoutList)
+            _navigationEvent.send(SplashNavigationEvent.NavigateToLogin)
         }
     }
 }
@@ -80,9 +79,12 @@ class SplashViewModel @Inject constructor(
  * explicitamente no `when` da UI (type-safety).
  */
 sealed class SplashNavigationEvent {
-    /** Usuário já autenticado ou retornante — vai para o app principal. */
+    /** Usuário já autenticado — vai direto para o app principal. */
     object NavigateToWorkoutList : SplashNavigationEvent()
 
     /** Novo usuário — inicia o fluxo de cadastro (OnboardingInfoScreen). */
     object NavigateToOnboarding : SplashNavigationEvent()
+
+    /** Usuário retornante — vai para a tela de login. */
+    object NavigateToLogin : SplashNavigationEvent()
 }
