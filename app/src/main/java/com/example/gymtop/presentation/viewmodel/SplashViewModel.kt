@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.gymtop.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,6 +35,12 @@ class SplashViewModel @Inject constructor(
     private val _navigationEvent = Channel<SplashNavigationEvent>(Channel.BUFFERED)
     val navigationEvent = _navigationEvent.receiveAsFlow()
 
+    // true enquanto a verificação de sessão está em andamento.
+    // Enquanto true, a SplashScreen esconde os botões para evitar o flash
+    // de "COMEÇAR / ENTRAR" antes de redirecionar o usuário autenticado.
+    private val _isCheckingAuth = MutableStateFlow(true)
+    val isCheckingAuth: StateFlow<Boolean> = _isCheckingAuth.asStateFlow()
+
     // ── Init: check persistent session ────────────────────────────────────────
 
     init {
@@ -40,9 +49,13 @@ class SplashViewModel @Inject constructor(
         viewModelScope.launch {
             val loggedInUser = authRepository.getCurrentUser()
             if (loggedInUser != null) {
+                // Usuário autenticado: dispara a navegação e mantém isCheckingAuth = true
+                // para que os botões NUNCA apareçam antes do redirect.
                 _navigationEvent.send(SplashNavigationEvent.NavigateToWorkoutList)
+            } else {
+                // Sem sessão ativa: revela os botões para o usuário agir.
+                _isCheckingAuth.value = false
             }
-            // Se null: a SplashScreen permanece visível aguardando ação do usuário.
         }
     }
 

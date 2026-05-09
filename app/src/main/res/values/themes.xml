@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Main app theme applied after the splash screen exits -->
     <style name="Theme.GymTop" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!--
+        System splash screen theme — shown instantly by the OS before any app code runs.
+        This eliminates the blank/white window during cold start.
+
+        windowSplashScreenBackground: matches GymTopBackground (#0D0D0D dark)
+        windowSplashScreenAnimatedIcon: the app logo shown centered on the splash
+        postSplashScreenTheme: the theme applied once the splash exits (Theme.GymTop)
+
+        Used by: MainActivity via installSplashScreen() in onCreate()
+    -->
+    <style name="Theme.GymTop.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0D0D0D</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_gym_top_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.GymTop</item>
+    </style>
+
 </resources>

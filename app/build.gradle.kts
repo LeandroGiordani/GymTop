@@ -63,7 +63,9 @@ dependencies {
 
     // App Startup — initializes libraries at app launch
     implementation(libs.androidx.startup.runtime)
-    
+    // SplashScreen API — replaces blank window on cold start with branded screen
+    implementation(libs.androidx.core.splashscreen)
+
     // Hilt Dependency Injection
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)

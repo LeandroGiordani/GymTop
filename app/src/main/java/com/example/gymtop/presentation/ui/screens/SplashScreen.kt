@@ -47,13 +47,18 @@ import com.example.gymtop.ui.theme.GymTopOnPrimary
  *    pinning it at vertical centre — just like a 50 % horizontal guideline.
  *  • Buttons and the footer live below the second spacer, always at the bottom.
  *
- * @param modifier     Standard Compose modifier forwarded to the root layout.
- * @param onStartClick Callback for the primary "COMEÇAR" button.
- * @param onEnterClick Callback for the secondary "ENTRAR" button.
+ * @param modifier        Standard Compose modifier forwarded to the root layout.
+ * @param isCheckingAuth  When true, hides the CTA buttons while we verify if the
+ *                        user already has an active session. This prevents a brief
+ *                        flash of the sign-in/sign-up buttons before the automatic
+ *                        redirect fires for authenticated users.
+ * @param onStartClick    Callback for the primary "COMEÇAR" button.
+ * @param onEnterClick    Callback for the secondary "ENTRAR" button.
  */
 @Composable
 fun SplashScreen(
     modifier: Modifier = Modifier,
+    isCheckingAuth: Boolean = true,
     onStartClick: () -> Unit = {},
     onEnterClick: () -> Unit = {}
 ) {
@@ -107,68 +112,74 @@ fun SplashScreen(
         // Shrinks to zero if the screen is too small, pushing buttons down.
         Spacer(Modifier.weight(1f))
 
-        // ── "COMEÇAR" primary CTA button ──────────────────────────────────────
-        // Solid primary fill; onPrimary text ensures accessible contrast.
-        Button(
-            onClick = onStartClick,
-            shape = RoundedCornerShape(9999.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = GymTopNeonGreen,
-                contentColor = GymTopOnPrimary
-            ),
-            contentPadding = PaddingValues(horizontal = 32.dp, vertical = 20.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
-        ) {
+        // ── CTAs + footer — hidden while auth check is in progress ────────────
+        // Prevents the brief flash of sign-in buttons before an authenticated
+        // user is automatically redirected to WorkoutListScreen.
+        if (!isCheckingAuth) {
+
+            // ── "COMEÇAR" primary CTA button ──────────────────────────────────────
+            // Solid primary fill; onPrimary text ensures accessible contrast.
+            Button(
+                onClick = onStartClick,
+                shape = RoundedCornerShape(9999.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GymTopNeonGreen,
+                    contentColor = GymTopOnPrimary
+                ),
+                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+            ) {
+                Text(
+                    text = "COMEÇAR",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.8.sp
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // ── "ENTRAR" secondary CTA button ─────────────────────────────────────
+            // Transparent fill with a 1 dp primary-coloured border.
+            Button(
+                onClick = onEnterClick,
+                shape = RoundedCornerShape(9999.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = GymTopNeonGreen
+                ),
+                border = BorderStroke(1.dp, GymTopNeonGreen),
+                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Text(
+                    text = "ENTRAR",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.8.sp
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // ── Version footer ────────────────────────────────────────────────────
+            // Very low-contrast — purely informational, never interactive.
             Text(
-                text = "COMEÇAR",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.8.sp
+                text = "VERSION 1.0.0 // GYM TOP ENGINE ACTIVE",
+                color = GymTopNeonGreen.copy(alpha = 0.2f),
+                fontSize = 8.sp,
+                letterSpacing = 4.sp,
+                textAlign = TextAlign.Center,
+                lineHeight = 1.5.em
             )
+
+            // Fixed gap between footer and the system nav bar inset.
+            Spacer(Modifier.height(40.dp))
         }
-
-        Spacer(Modifier.height(16.dp))
-
-        // ── "ENTRAR" secondary CTA button ─────────────────────────────────────
-        // Transparent fill with a 1 dp primary-coloured border.
-        Button(
-            onClick = onEnterClick,
-            shape = RoundedCornerShape(9999.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent,
-                contentColor = GymTopNeonGreen
-            ),
-            border = BorderStroke(1.dp, GymTopNeonGreen),
-            contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        ) {
-            Text(
-                text = "ENTRAR",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.8.sp
-            )
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        // ── Version footer ────────────────────────────────────────────────────
-        // Very low-contrast — purely informational, never interactive.
-        Text(
-            text = "VERSION 1.0.0 // GYM TOP ENGINE ACTIVE",
-            color = GymTopNeonGreen.copy(alpha = 0.2f),
-            fontSize = 8.sp,
-            letterSpacing = 4.sp,
-            textAlign = TextAlign.Center,
-            lineHeight = 1.5.em
-        )
-
-        // Fixed gap between footer and the system nav bar inset.
-        Spacer(Modifier.height(40.dp))
     }
 }
 
@@ -176,5 +187,5 @@ fun SplashScreen(
 @Preview(widthDp = 390, heightDp = 844)
 @Composable
 private fun SplashScreenPreview() {
-    SplashScreen()
+    SplashScreen(isCheckingAuth = false)
 }

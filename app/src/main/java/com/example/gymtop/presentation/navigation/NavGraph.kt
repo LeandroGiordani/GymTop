@@ -89,6 +89,7 @@ fun NavGraph(
         // Rota: Splash / landing
         composable(route = Screens.Splash.route) {
             val viewModel: SplashViewModel = hiltViewModel()
+            val isCheckingAuth by viewModel.isCheckingAuth.collectAsState()
 
             LaunchedEffect(Unit) {
                 viewModel.navigationEvent.collect { event ->
@@ -112,6 +113,7 @@ fun NavGraph(
             }
 
             SplashScreen(
+                isCheckingAuth = isCheckingAuth,
                 onStartClick = viewModel::onStartClicked,
                 onEnterClick = viewModel::onEnterClicked
             )
