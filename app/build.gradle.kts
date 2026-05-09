@@ -40,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -59,6 +60,9 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // App Startup — initializes libraries at app launch
+    implementation(libs.androidx.startup.runtime)
     
     // Hilt Dependency Injection
     implementation(libs.hilt.android)

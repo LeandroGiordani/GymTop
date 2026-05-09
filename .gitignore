@@ -95,3 +95,14 @@ dependency-reduced-pom.xml
 out/
 bin/
 gen/
+
+# Firebase emulator
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+emulator-data/
+
+# Gradle wrapper jar (optional — debated, but common to ignore)
+gradle/wrapper/gradle-wrapper.jar
