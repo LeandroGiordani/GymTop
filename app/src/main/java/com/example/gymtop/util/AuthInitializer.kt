@@ -20,7 +20,7 @@ class AuthInitializer : Initializer<FirebaseAuth> {
         val auth = FirebaseAuth.getInstance()
         // useEmulator só pode ser chamado uma vez; protege contra reinicialização
         if (BuildConfig.DEBUG) {
-            auth.useEmulator(FIRESTORE_EMULATOR_HOST, FIRESTORE_EMULATOR_PORT)
+            auth.useEmulator(AUTH_EMULATOR_HOST, AUTH_EMULATOR_PORT)
         }
         return auth
     }
@@ -31,7 +31,7 @@ class AuthInitializer : Initializer<FirebaseAuth> {
     companion object {
         // The host '10.0.2.2' is a special IP address to let the
         // Android emulator connect to 'localhost'.
-        private const val FIRESTORE_EMULATOR_HOST = "10.0.2.2"
-        private const val FIRESTORE_EMULATOR_PORT = 9099
+        private const val AUTH_EMULATOR_HOST = "10.0.2.2"
+        private const val AUTH_EMULATOR_PORT = 9099
     }
 }
