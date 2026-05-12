@@ -2,14 +2,13 @@ package com.example.gymtop.util
 
 import android.content.Context
 import androidx.startup.Initializer
-import com.example.gymtop.BuildConfig
 import com.google.firebase.auth.FirebaseAuth
 
 /**
  * AuthInitializer — conecta o Firebase Auth ao emulador local em builds de debug.
  *
  * Roda automaticamente via Jetpack App Startup antes do Application.onCreate().
- * Em builds de release, esta classe não existe — o source set debug é excluído.
+ * Esta classe existe APENAS no source set debug — em release ela não é compilada.
  *
  * Emulator host: 10.0.2.2 é o alias do localhost do computador no emulador Android.
  * Porta padrão do Auth emulator: 9099.
@@ -19,9 +18,7 @@ class AuthInitializer : Initializer<FirebaseAuth> {
     override fun create(context: Context): FirebaseAuth {
         val auth = FirebaseAuth.getInstance()
         // useEmulator só pode ser chamado uma vez; protege contra reinicialização
-        if (BuildConfig.DEBUG) {
-            auth.useEmulator(AUTH_EMULATOR_HOST, AUTH_EMULATOR_PORT)
-        }
+        auth.useEmulator(AUTH_EMULATOR_HOST, AUTH_EMULATOR_PORT)
         return auth
     }
 

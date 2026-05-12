@@ -2,21 +2,19 @@ package com.example.gymtop.util
 
 import android.content.Context
 import androidx.startup.Initializer
-import com.example.gymtop.BuildConfig
 import com.google.firebase.firestore.FirebaseFirestore
 
 /**
  * FirestoreInitializer — conecta o Firestore ao emulador local em builds de debug.
  *
+ * Esta classe existe APENAS no source set debug — em release ela não é compilada.
  * Porta padrão do Firestore emulator: 8080.
  */
 class FirestoreInitializer : Initializer<FirebaseFirestore> {
 
     override fun create(context: Context): FirebaseFirestore {
         val firestore = FirebaseFirestore.getInstance()
-        if (BuildConfig.DEBUG) {
-            firestore.useEmulator(FIRESTORE_EMULATOR_HOST, FIRESTORE_EMULATOR_PORT)
-        }
+        firestore.useEmulator(FIRESTORE_EMULATOR_HOST, FIRESTORE_EMULATOR_PORT)
         return firestore
     }
 
