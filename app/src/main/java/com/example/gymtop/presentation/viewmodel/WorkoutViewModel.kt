@@ -2,7 +2,7 @@ package com.example.gymtop.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gymtop.data.repository.WorkoutRepository
+import com.example.gymtop.domain.repository.WorkoutRepository
 import com.example.gymtop.domain.model.Workout
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

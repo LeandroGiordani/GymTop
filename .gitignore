@@ -59,6 +59,10 @@ READY_TO_CODE.txt
 .env.local
 .env.*.local
 
+# Firebase — NEVER commit google-services.json (contains API keys)
+# Download the real file from Firebase Console and place it at app/google-services.json
+app/google-services.json
+
 # OS files
 Thumbs.db
 *.swp
@@ -91,3 +95,14 @@ dependency-reduced-pom.xml
 out/
 bin/
 gen/
+
+# Firebase emulator
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+emulator-data/
+
+# Gradle wrapper jar (optional — debated, but common to ignore)
+gradle/wrapper/gradle-wrapper.jar

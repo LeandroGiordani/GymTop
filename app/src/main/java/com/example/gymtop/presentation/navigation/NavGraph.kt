@@ -2,14 +2,24 @@ package com.example.gymtop.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.gymtop.presentation.ui.screens.CreatePasswordScreen
+import com.example.gymtop.presentation.ui.screens.LoginScreen
+import com.example.gymtop.presentation.ui.screens.OnboardingInfoScreen
 import com.example.gymtop.presentation.ui.screens.SplashScreen
 import com.example.gymtop.presentation.ui.screens.WorkoutDetailScreen
 import com.example.gymtop.presentation.ui.screens.WorkoutListScreen
+import com.example.gymtop.presentation.viewmodel.LoginNavigationEvent
+import com.example.gymtop.presentation.viewmodel.LoginViewModel
+import com.example.gymtop.presentation.viewmodel.OnboardingNavigationEvent
+import com.example.gymtop.presentation.viewmodel.OnboardingViewModel
 import com.example.gymtop.presentation.viewmodel.SplashNavigationEvent
 import com.example.gymtop.presentation.viewmodel.SplashViewModel
 
@@ -37,6 +47,14 @@ import com.example.gymtop.presentation.viewmodel.SplashViewModel
  */
 sealed class Screens(val route: String) {
     object Splash : Screens("splash")
+    // ── Onboarding / sign-up flow ──────────────────────────────────────────────
+    // Duas telas sequenciais: dados pessoais → criação de senha.
+    // Compartilham o mesmo OnboardingViewModel (hiltViewModel() no NavGraph).
+    object OnboardingInfo   : Screens("onboarding_info")
+    object CreatePassword   : Screens("create_password")
+    // ── Login ──────────────────────────────────────────────────────────────────
+    object Login            : Screens("login")
+    // ── Main app ───────────────────────────────────────────────────────────────
     object WorkoutList : Screens("workout_list")
     object WorkoutDetail : Screens("workout_detail/{workoutId}") {
         fun createRoute(workoutId: Long) = "workout_detail/$workoutId"
@@ -68,14 +86,120 @@ fun NavGraph(
         navController = navController,
         startDestination = Screens.Splash.route
     ) {
-        // Rota: Splash / onboarding
+        // Rota: Splash / landing
         composable(route = Screens.Splash.route) {
             val viewModel: SplashViewModel = hiltViewModel()
+            val isCheckingAuth by viewModel.isCheckingAuth.collectAsState()
 
             LaunchedEffect(Unit) {
                 viewModel.navigationEvent.collect { event ->
                     when (event) {
+                        // Usuário retornante — já autenticado, vai direto para o app
                         SplashNavigationEvent.NavigateToWorkoutList -> {
+                            navController.navigate(Screens.WorkoutList.route) {
+                                popUpTo(Screens.Splash.route) { inclusive = true }
+                            }
+                        }
+                        // Novo usuário — inicia o fluxo de onboarding (cadastro)
+                        SplashNavigationEvent.NavigateToOnboarding -> {
+                            navController.navigate(Screens.OnboardingInfo.route)
+                        }
+                        // Usuário retornante — vai para a tela de login
+                        SplashNavigationEvent.NavigateToLogin -> {
+                            navController.navigate(Screens.Login.route)
+                        }
+                    }
+                }
+            }
+
+            SplashScreen(
+                isCheckingAuth = isCheckingAuth,
+                onStartClick = viewModel::onStartClicked,
+                onEnterClick = viewModel::onEnterClicked
+            )
+        }
+
+        // ── Onboarding flow ────────────────────────────────────────────────────
+        // As duas telas compartilham o mesmo ViewModel instanciado no
+        // back-stack entry da rota pai "onboarding_info".
+        // hiltViewModel() com o mesmo NavBackStackEntry garante que o ViewModel
+        // não seja recriado ao navegar entre as duas telas.
+
+        // Rota: tela de informações pessoais (nome, email, gênero)
+        composable(route = Screens.OnboardingInfo.route) { entry ->
+            val viewModel: OnboardingViewModel = hiltViewModel(entry)
+            val uiState by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.clearError()
+                viewModel.navigationEvent.collect { event ->
+                    when (event) {
+                        OnboardingNavigationEvent.NavigateToCreatePassword -> {
+                            navController.navigate(Screens.CreatePassword.route)
+                        }
+                        // NavigateToLogin não é esperado nesta tela, mas o when
+                        // precisa ser exaustivo — ignoramos silenciosamente.
+                        OnboardingNavigationEvent.NavigateToLogin -> Unit
+                    }
+                }
+            }
+
+            OnboardingInfoScreen(
+                name             = uiState.name,
+                email            = uiState.email,
+                selectedGender   = uiState.gender,
+                errorMessage     = uiState.errorMessage,
+                onNameChanged    = viewModel::onNameChanged,
+                onEmailChanged   = viewModel::onEmailChanged,
+                onGenderSelected = viewModel::onGenderSelected,
+                onContinueClicked= viewModel::onInfoContinueClicked
+            )
+        }
+
+        // Rota: tela de criação de senha
+        composable(route = Screens.CreatePassword.route) {
+            // Busca o ViewModel do back-stack entry da OnboardingInfoScreen
+            // para reutilizar o mesmo state (nome, email, gênero já preenchidos).
+            val onboardingEntry = remember(it) {
+                navController.getBackStackEntry(Screens.OnboardingInfo.route)
+            }
+            val viewModel: OnboardingViewModel = hiltViewModel(onboardingEntry)
+            val uiState by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.navigationEvent.collect { event ->
+                    if (event == OnboardingNavigationEvent.NavigateToLogin) {
+                        // Cadastro concluído — remove todo o fluxo de onboarding
+                        // da back stack e envia o usuário para o login.
+                        navController.navigate(Screens.Login.route) {
+                            popUpTo(Screens.OnboardingInfo.route) { inclusive = true }
+                        }
+                    }
+                }
+            }
+
+            CreatePasswordScreen(
+                password                 = uiState.password,
+                confirmPassword          = uiState.confirmPassword,
+                isLoading                = uiState.isLoading,
+                errorMessage             = uiState.errorMessage,
+                onPasswordChanged        = viewModel::onPasswordChanged,
+                onConfirmPasswordChanged = viewModel::onConfirmPasswordChanged,
+                onCreateAccountClicked   = viewModel::onCreateAccountClicked
+            )
+        }
+
+        // Rota: Tela de login (usuário retornante)
+        composable(route = Screens.Login.route) {
+            val viewModel: LoginViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.clearError()
+                viewModel.navigationEvent.collect { event ->
+                    when (event) {
+                        LoginNavigationEvent.NavigateToWorkoutList -> {
+                            // Remove toda a stack de auth ao entrar no app
                             navController.navigate(Screens.WorkoutList.route) {
                                 popUpTo(Screens.Splash.route) { inclusive = true }
                             }
@@ -84,9 +208,14 @@ fun NavGraph(
                 }
             }
 
-            SplashScreen(
-                onStartClick = viewModel::onStartClicked,
-                onEnterClick = viewModel::onEnterClicked
+            LoginScreen(
+                email            = uiState.email,
+                password         = uiState.password,
+                isLoading        = uiState.isLoading,
+                errorMessage     = uiState.errorMessage,
+                onEmailChanged   = viewModel::onEmailChanged,
+                onPasswordChanged= viewModel::onPasswordChanged,
+                onLoginClicked   = viewModel::onLoginClicked
             )
         }
 
