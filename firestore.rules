@@ -17,9 +17,10 @@ service cloud.firestore {
         request.resource.data.email is string &&
         request.resource.data.email.size() > 0 &&
         request.resource.data.email.size() <= 254 &&
-        request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$') &&
+        request.auth.token.email != null &&
+        request.resource.data.email == request.auth.token.email &&
         request.resource.data.gender is string &&
-        request.resource.data.gender in ['MASCULINO', 'FEMININO', 'OUTRO'];
+        request.resource.data.gender in ['MASCULINO', 'FEMININO', 'OUTRO']; // Matches app enum values
     }
 
     match /users/{userId} {
