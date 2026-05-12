@@ -1,6 +1,5 @@
 package com.example.gymtop.di
 
-import com.example.gymtop.data.datasource.LibraryDataSource
 import com.example.gymtop.data.repository.ExerciseRepositoryImpl
 import com.example.gymtop.data.repository.SetRepositoryImpl
 import com.example.gymtop.data.repository.WorkoutRepositoryImpl
