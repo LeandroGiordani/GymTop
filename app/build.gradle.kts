@@ -45,6 +45,10 @@ android {
             // Local-only opt in: ./gradlew assembleRelease -PsignReleaseWithDebugKey=true
             if (providers.gradleProperty("signReleaseWithDebugKey").orNull == "true") {
                 signingConfig = signingConfigs.getByName("releaseWithDebugKey")
+            } else {
+                logger.lifecycle(
+                    "Release build is unsigned. Use -PsignReleaseWithDebugKey=true for local testing only."
+                )
             }
         }
     }
