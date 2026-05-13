@@ -42,8 +42,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Sign release builds with the debug keystore for local testing only
-            signingConfig = signingConfigs.getByName("releaseWithDebugKey")
+            // Local-only opt in: ./gradlew assembleRelease -PsignReleaseWithDebugKey=true
+            if (providers.gradleProperty("signReleaseWithDebugKey").orNull == "true") {
+                signingConfig = signingConfigs.getByName("releaseWithDebugKey")
+            }
         }
     }
     compileOptions {
