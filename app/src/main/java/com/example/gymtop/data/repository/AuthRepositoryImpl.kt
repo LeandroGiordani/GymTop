@@ -31,11 +31,6 @@ class AuthRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : AuthRepository {
 
-    // ── Firestore collection name constant ─────────────────────────────────────
-    companion object {
-        private const val USERS_COLLECTION = "users"
-    }
-
     // ── getCurrentUser ─────────────────────────────────────────────────────────
 
     /**
@@ -187,4 +182,8 @@ class AuthRepositoryImpl @Inject constructor(
         email  = email ?: "",
         gender = Gender.OUTRO   // Firebase Auth não suporta campos customizados
     )
+    companion object {
+        // ── Firestore collection name constant ─────────────────────────────────────
+        private const val USERS_COLLECTION = "users"
+    }
 }
