@@ -41,7 +41,7 @@ class AuthRepositoryImpl @Inject constructor(
         val firebaseUser = firebaseAuth.currentUser ?: return null
         return try {
             fetchUserProfile(firebaseUser.uid)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Firestore offline (e.g. emulator not running, no internet)
             // Fall back to basic Auth data — gender will be OUTRO until Firestore is reachable
             null
