@@ -31,11 +31,6 @@ class AuthRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : AuthRepository {
 
-    // ── Firestore collection name constant ─────────────────────────────────────
-    companion object {
-        private const val USERS_COLLECTION = "users"
-    }
-
     // ── getCurrentUser ─────────────────────────────────────────────────────────
 
     /**
@@ -46,7 +41,7 @@ class AuthRepositoryImpl @Inject constructor(
         val firebaseUser = firebaseAuth.currentUser ?: return null
         return try {
             fetchUserProfile(firebaseUser.uid)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Firestore offline (e.g. emulator not running, no internet)
             // Fall back to basic Auth data — gender will be OUTRO until Firestore is reachable
             null
@@ -187,4 +182,8 @@ class AuthRepositoryImpl @Inject constructor(
         email  = email ?: "",
         gender = Gender.OUTRO   // Firebase Auth não suporta campos customizados
     )
+    companion object {
+        // ── Firestore collection name constant ─────────────────────────────────────
+        private const val USERS_COLLECTION = "users"
+    }
 }

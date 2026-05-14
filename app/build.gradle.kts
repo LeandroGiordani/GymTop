@@ -17,9 +17,22 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 1
+
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        // Uses the default Android debug keystore for signing release builds locally.
+        // This allows testing production Firebase without a proper release keystore.
+        // ⚠️ NEVER use this for Play Store submissions — create a proper release keystore instead.
+        create("releaseWithDebugKey") {
+            storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
@@ -29,6 +42,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Local-only opt in: ./gradlew assembleRelease -PsignReleaseWithDebugKey=true
+            if (providers.gradleProperty("signReleaseWithDebugKey").orNull == "true") {
+                signingConfig = signingConfigs.getByName("releaseWithDebugKey")
+            } else {
+                logger.lifecycle(
+                    "Release build is unsigned. Use -PsignReleaseWithDebugKey=true for local testing only."
+                )
+            }
         }
     }
     compileOptions {
