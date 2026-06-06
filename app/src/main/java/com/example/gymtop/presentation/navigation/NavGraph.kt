@@ -12,10 +12,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.gymtop.presentation.ui.screens.CreatePasswordScreen
 import com.example.gymtop.presentation.ui.screens.LoginScreen
+import com.example.gymtop.presentation.ui.screens.MainScreen
 import com.example.gymtop.presentation.ui.screens.OnboardingInfoScreen
 import com.example.gymtop.presentation.ui.screens.SplashScreen
 import com.example.gymtop.presentation.ui.screens.WorkoutDetailScreen
-import com.example.gymtop.presentation.ui.screens.WorkoutListScreen
 import com.example.gymtop.presentation.viewmodel.LoginNavigationEvent
 import com.example.gymtop.presentation.viewmodel.LoginViewModel
 import com.example.gymtop.presentation.viewmodel.OnboardingNavigationEvent
@@ -55,7 +55,8 @@ sealed class Screens(val route: String) {
     // ── Login ──────────────────────────────────────────────────────────────────
     object Login            : Screens("login")
     // ── Main app ───────────────────────────────────────────────────────────────
-    object WorkoutList : Screens("workout_list")
+    // Main é o shell pós-login: contém a bottom nav com Home (WorkoutList) e Biblioteca.
+    object Main : Screens("main")
     object WorkoutDetail : Screens("workout_detail/{workoutId}") {
         fun createRoute(workoutId: Long) = "workout_detail/$workoutId"
     }
@@ -96,7 +97,7 @@ fun NavGraph(
                     when (event) {
                         // Usuário retornante — já autenticado, vai direto para o app
                         SplashNavigationEvent.NavigateToWorkoutList -> {
-                            navController.navigate(Screens.WorkoutList.route) {
+                            navController.navigate(Screens.Main.route) {
                                 popUpTo(Screens.Splash.route) { inclusive = true }
                             }
                         }
@@ -200,7 +201,7 @@ fun NavGraph(
                     when (event) {
                         LoginNavigationEvent.NavigateToWorkoutList -> {
                             // Remove toda a stack de auth ao entrar no app
-                            navController.navigate(Screens.WorkoutList.route) {
+                            navController.navigate(Screens.Main.route) {
                                 popUpTo(Screens.Splash.route) { inclusive = true }
                             }
                         }
@@ -219,11 +220,14 @@ fun NavGraph(
             )
         }
 
-        // Rota: Tela de lista de treinos
-        composable(route = Screens.WorkoutList.route) {
-            WorkoutListScreen(
+        // Rota: Shell principal pós-login — contém bottom nav (Home + Biblioteca)
+        composable(route = Screens.Main.route) {
+            MainScreen(
                 onNavigateToDetail = { workoutId ->
                     navController.navigate(Screens.WorkoutDetail.createRoute(workoutId))
+                },
+                onAddWorkout = {
+                    // TODO: navegar para tela de criação de treino
                 }
             )
         }

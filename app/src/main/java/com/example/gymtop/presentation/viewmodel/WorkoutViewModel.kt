@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.gymtop.domain.repository.WorkoutRepository
 import com.example.gymtop.domain.model.Workout
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -72,18 +74,14 @@ class WorkoutViewModel @Inject constructor(
      * Executa em background (não bloqueia a UI)
      */
     private fun loadAllWorkouts() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
-            try {
-                // Coleta o Flow do Repository e atualiza StateFlow
-                workoutRepository.getAllWorkouts().collect { workouts ->
+            workoutRepository.getAllWorkouts()
+                .catch { e -> _errorMessage.value = "Erro ao carregar treinos: ${e.message}" }
+                .collect { workouts ->
                     _allWorkouts.value = workouts
+                    _isLoading.value = false  // false after first (and every) emission
                 }
-            } catch (e: Exception) {
-                _errorMessage.value = "Erro ao carregar treinos: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
         }
     }
 
