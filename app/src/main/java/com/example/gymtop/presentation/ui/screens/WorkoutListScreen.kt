@@ -49,7 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.gymtop.R
 import com.example.gymtop.presentation.ui.components.WorkoutListItem
 import com.example.gymtop.presentation.viewmodel.WorkoutContent
-import com.example.gymtop.presentation.viewmodel.WorkoutViewModel
+import com.example.gymtop.presentation.viewmodel.WorkoutListViewModel
 import com.example.gymtop.ui.theme.GymTopBackground
 import com.example.gymtop.ui.theme.GymTopNeonGreen
 import com.example.gymtop.ui.theme.GymTopOnPrimary
@@ -73,7 +73,7 @@ fun WorkoutListScreen(
 //    modifier: Modifier = Modifier,
     onNavigateToDetail: (workoutId: Long) -> Unit = {}
 ) {
-    val viewModel: WorkoutViewModel = hiltViewModel()
+    val viewModel: WorkoutListViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(

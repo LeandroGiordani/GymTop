@@ -1,6 +1,5 @@
 package com.example.gymtop.presentation.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gymtop.domain.repository.WorkoutRepository
@@ -8,7 +7,6 @@ import com.example.gymtop.domain.model.Workout
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
@@ -16,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * WorkoutViewModel - ViewModel que gerencia o estado da UI relacionado a Workouts
+ * WorkoutListViewModel - ViewModel que gerencia o estado da UI relacionado a Workouts
  *
  * Padrão MVVM:
  * ViewModel é o intermediário entre a UI e os Dados (Repository).
@@ -53,7 +51,7 @@ sealed interface WorkoutContent {
 }
 
 @HiltViewModel
-class WorkoutViewModel @Inject constructor(
+class WorkoutListViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository
 ) : ViewModel() {
 
@@ -180,4 +178,3 @@ class WorkoutViewModel @Inject constructor(
      * - etc.
      */
 }
-
