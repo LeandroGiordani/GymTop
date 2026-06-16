@@ -1,5 +1,6 @@
 package com.example.gymtop.presentation.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gymtop.domain.repository.WorkoutRepository
@@ -8,7 +9,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,69 +39,94 @@ import javax.inject.Inject
  * - suspend fun: Funções assíncronas que precisam de coroutine
  * - launch: Inicia coroutine sem bloquear a thread
  */
+
+data class WorkoutListUiState(
+    val content: WorkoutContent = WorkoutContent.Loading,
+    val showAddWorkoutDialog: Boolean = false
+)
+
+sealed interface WorkoutContent {
+    object Loading : WorkoutContent
+    object Empty : WorkoutContent
+    data class Success(val workouts: List<Workout>) : WorkoutContent
+    data class Error(val message: String) : WorkoutContent
+}
+
 @HiltViewModel
 class WorkoutViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository
 ) : ViewModel() {
 
-    /**
-     * Lista de todos os treinos - atualiza automaticamente quando dados mudam no banco
-     * Private set garante que apenas ViewModel pode modificar (encapsulamento)
-     * _allWorkouts é privado, allWorkouts é público (padrão backing property)
-     */
-    private val _allWorkouts: MutableStateFlow<List<Workout>> = MutableStateFlow(emptyList())
-    val allWorkouts: StateFlow<List<Workout>> = _allWorkouts
-
-    /**
-     * Estado de carregamento - para mostrar spinner na UI
-     */
-    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
-
-    /**
-     * Mensagem de erro - para mostrar snackbar ou toast
-     */
-    private val _errorMessage: MutableStateFlow<String?> = MutableStateFlow(null)
-    val errorMessage: StateFlow<String?> = _errorMessage
+    private val _uiState  = MutableStateFlow(WorkoutListUiState())
+    val uiState = _uiState.asStateFlow()
 
     init {
         /**
          * Carrega todos os treinos quando o ViewModel é criado
          * loadAllWorkouts() é chamado automaticamente
          */
-        loadAllWorkouts()
+        observeWorkouts()
     }
 
     /**
-     * Carrega todos os treinos do Repository e atualiza _allWorkouts
+     * Carrega todos os treinos do Repository e observa mudanças
      * Executa em background (não bloqueia a UI)
      */
-    private fun loadAllWorkouts() {
+    private fun observeWorkouts() {
         viewModelScope.launch(Dispatchers.IO) {
-            _isLoading.value = true
             workoutRepository.getAllWorkouts()
-                .catch { e -> _errorMessage.value = "Erro ao carregar treinos: ${e.message}" }
+                .catch { e ->
+                    _uiState.update {
+                        it.copy(
+                            content = WorkoutContent.Error(message = "Erro ao carregar treinos: ${e.message}")
+                        )
+                    }
+                }
                 .collect { workouts ->
-                    _allWorkouts.value = workouts
-                    _isLoading.value = false  // false after first (and every) emission
+                    _uiState.update {
+                        it.copy(
+                            content = if (workouts.isEmpty()) {
+                                WorkoutContent.Empty
+                            } else {
+                                WorkoutContent.Success(workouts)
+                            }
+                        )
+                    }
                 }
         }
     }
 
+    private fun updateDialog(show: Boolean) {
+        _uiState.update { it.copy(showAddWorkoutDialog = show) }
+    }
+
+    fun openCreateWorkoutDialog() {
+        updateDialog(true)
+    }
+
+    fun closeCreateWorkoutDialog() {
+        updateDialog(false)
+    }
+
     /**
      * Insere um novo treino
-     * TODO: Implementar quando UI estiver pronta
-     * @param workout: Treino a ser inserido
+     * @param workoutTitle: Treino a ser inserido
      */
-    fun addWorkout(workout: Workout) {
+    fun addWorkout(workoutTitle: String) {
         viewModelScope.launch {
             try {
-                // TODO: Validar dados antes de inserir
-                workoutRepository.insertWorkout(workout)
+                if (workoutTitle.isNotBlank()) {
+                    workoutRepository.insertWorkout(workoutTitle)
+                }
                 // StateFlow será atualizado automaticamente via loadAllWorkouts()
             } catch (e: Exception) {
-                _errorMessage.value = "Erro ao adicionar treino: ${e.message}"
+                _uiState.update {
+                    it.copy(
+                        content = WorkoutContent.Error(message = "Erro ao adicionar treino: ${e.message}")
+                    )
+                }
             }
+            closeCreateWorkoutDialog()
         }
     }
 
@@ -113,7 +141,11 @@ class WorkoutViewModel @Inject constructor(
                 // TODO: Validar dados antes de atualizar
                 workoutRepository.updateWorkout(workout)
             } catch (e: Exception) {
-                _errorMessage.value = "Erro ao atualizar treino: ${e.message}"
+                _uiState.update {
+                    it.copy(
+                        content = WorkoutContent.Error(message = "Erro ao atualizar treino: ${e.message}")
+                    )
+                }
             }
         }
     }
@@ -128,16 +160,17 @@ class WorkoutViewModel @Inject constructor(
             try {
                 workoutRepository.deleteWorkout(workout)
             } catch (e: Exception) {
-                _errorMessage.value = "Erro ao deletar treino: ${e.message}"
+                _uiState.update {
+                    it.copy(
+                        content = WorkoutContent.Error(message = "Erro ao deletar treino: ${e.message}")
+                    )
+                }
             }
         }
     }
 
-    /**
-     * Limpa mensagem de erro (ex: depois de mostrar ao usuário)
-     */
-    fun clearErrorMessage() {
-        _errorMessage.value = null
+    fun reloadWorkouts() {
+        observeWorkouts()
     }
 
     /**

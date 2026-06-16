@@ -7,6 +7,7 @@ import com.example.gymtop.data.mapper.toEntity
 import com.example.gymtop.domain.model.Workout
 import com.example.gymtop.domain.repository.WorkoutRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -38,11 +39,10 @@ class WorkoutRepositoryImpl @Inject constructor(
 
     /**
      * Insere um novo treino de forma assíncrona.
-     * @param workout Objeto treino a ser inserido.
+     * @param workoutTitle Objeto treino a ser inserido.
      */
-    override suspend fun insertWorkout(workout: Workout) {
-        // TODO: Adicionar validação de dados (nome não vazio, etc.)
-        workoutDao.insert(workout.toEntity())
+    override suspend fun insertWorkout(workoutTitle: String) {
+        workoutDao.insert(WorkoutEntity(name = workoutTitle))
     }
 
     /**

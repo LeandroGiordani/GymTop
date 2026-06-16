@@ -4,19 +4,26 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,16 +39,20 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.gymtop.R
 import com.example.gymtop.presentation.ui.components.WorkoutListItem
+import com.example.gymtop.presentation.viewmodel.WorkoutContent
 import com.example.gymtop.presentation.viewmodel.WorkoutViewModel
 import com.example.gymtop.ui.theme.GymTopBackground
 import com.example.gymtop.ui.theme.GymTopNeonGreen
+import com.example.gymtop.ui.theme.GymTopOnPrimary
 import com.example.gymtop.ui.theme.GymTopTheme
 
 /**
@@ -52,25 +63,21 @@ import com.example.gymtop.ui.theme.GymTopTheme
  * - Empty: exibe o estado vazio com ícone e mensagem de boas-vindas.
  * - Content: exibe [LazyColumn] com os treinos cadastrados.
  *
- * O FAB ("Novo treino") vive em [MainScreen] para não ser renderizado aqui —
- * seguindo a recomendação do Scaffold de manter o FAB no nível do Scaffold.
  *
- * @param modifier          Modificador externo — recebe o padding do Scaffold via [MainScreen].
  * @param onNavigateToDetail Callback para navegar ao detalhe de um treino ao clicar no item.
  */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutListScreen(
-    modifier: Modifier = Modifier,
+//    modifier: Modifier = Modifier,
     onNavigateToDetail: (workoutId: Long) -> Unit = {}
 ) {
     val viewModel: WorkoutViewModel = hiltViewModel()
-    val workouts by viewModel.allWorkouts.collectAsState(initial = emptyList())
-    val isLoading by viewModel.isLoading.collectAsState(initial = false)
-    val errorMessage by viewModel.errorMessage.collectAsState(initial = null)
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        // ── Top App Bar ───────────────────────────────────────────────
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -96,11 +103,30 @@ fun WorkoutListScreen(
                     }
                 }
             )
-        }
+        },
+
+        // ── Floating Action Button — only on Home tab ──────────────────────────
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = viewModel::openCreateWorkoutDialog,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Novo treino"
+                )
+            }
+        },
+
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        when {
+
+        when (val state = uiState.content) {
+
             // ── Loading state ──────────────────────────────────────────────────
-            isLoading -> {
+            is WorkoutContent.Loading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -114,7 +140,7 @@ fun WorkoutListScreen(
             }
 
             // ── Error state ────────────────────────────────────────────────────
-            errorMessage != null -> {
+            is WorkoutContent.Error -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -122,17 +148,36 @@ fun WorkoutListScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = errorMessage ?: "Erro desconhecido",
+                        text = state.message,
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(24.dp),
                         color = MaterialTheme.colorScheme.error,
                     )
+
+                    Button(
+                        onClick = viewModel::reloadWorkouts,
+                        shape = RoundedCornerShape(9999.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = GymTopNeonGreen,
+                            contentColor   = GymTopOnPrimary
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp)
+                    ) {
+                        Text(
+                            text          = "Tentar Novamente",
+                            fontSize      = 14.sp,
+                            fontWeight    = FontWeight.Bold,
+                            letterSpacing = 2.8.sp
+                        )
+                    }
                 }
             }
 
             // ── Empty state ────────────────────────────────────────────────────
-            workouts.isEmpty() -> {
+            is WorkoutContent.Empty -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -144,9 +189,14 @@ fun WorkoutListScreen(
             }
 
             // ── Content state ──────────────────────────────────────────────────
-            else -> {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(workouts) { workout ->
+            is WorkoutContent.Success -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding())
+                ) {
+                    items(state.workouts) { workout ->
                         WorkoutListItem(
                             workout = workout,
                             onItemClick = { onNavigateToDetail(workout.id) },
@@ -156,6 +206,16 @@ fun WorkoutListScreen(
                 }
             }
         }
+
+        if (uiState.showAddWorkoutDialog) {
+            CreateWorkoutDialog(
+                onDismiss = viewModel::closeCreateWorkoutDialog,
+                onConfirm = { workoutTitle ->
+                    viewModel.addWorkout(workoutTitle)
+                    viewModel.closeCreateWorkoutDialog()
+                }
+            )
+        }
     }
 }
 
@@ -163,7 +223,7 @@ fun WorkoutListScreen(
  * WorkoutEmptyState — exibido quando o usuário ainda não criou nenhum treino.
  *
  * Layout:
- * - Ícone de haltere em um círculo escuro com glow decorativo ao redor.
+ * - Ícone de haltere num círculo escuro com glow decorativo ao redor.
  * - Mensagem motivacional abaixo.
  *
  * Design inspirado no mockup: círculo [GymTopSurface] com ícone [GymTopNeonGreen],
