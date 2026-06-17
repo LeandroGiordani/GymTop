@@ -194,9 +194,12 @@ fun WorkoutListScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding),
-                    contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding())
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
-                    items(state.workouts) { workout ->
+                    items(
+                        items = state.workouts,
+                        key = { it.id }
+                    ) { workout ->
                         WorkoutListItem(
                             workout = workout,
                             onItemClick = { onNavigateToDetail(workout.id) },

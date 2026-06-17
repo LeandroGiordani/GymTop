@@ -111,7 +111,7 @@ class WorkoutListViewModel @Inject constructor(
      * @param workoutTitle: Treino a ser inserido
      */
     fun addWorkout(workoutTitle: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 if (workoutTitle.isNotBlank()) {
                     workoutRepository.insertWorkout(workoutTitle)
@@ -134,7 +134,7 @@ class WorkoutListViewModel @Inject constructor(
      * @param workout: Treino com dados atualizados
      */
     fun updateWorkout(workout: Workout) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 // TODO: Validar dados antes de atualizar
                 workoutRepository.updateWorkout(workout)
@@ -150,11 +150,10 @@ class WorkoutListViewModel @Inject constructor(
 
     /**
      * Deleta um treino
-     * TODO: Implementar quando UI estiver pronta
      * @param workout: Treino a ser deletado
      */
     fun deleteWorkout(workout: Workout) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 workoutRepository.deleteWorkout(workout)
             } catch (e: Exception) {

@@ -21,6 +21,10 @@ kspVersion = "2.3.7"
 firebaseBom = "33.7.0"
 # Google Sign-In (play-services-auth)
 playServicesAuth = "21.2.0"
+# Mockkito
+mockk = "1.14.11"
+# Turbine
+turbine = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -57,6 +61,7 @@ androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "l
 # Coroutines
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 # Provides .await() extension for Firebase Tasks (e.g. firebaseAuth.signIn(...).await())
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
 # Hilt Navigation Compose
@@ -71,6 +76,10 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
 # Google Sign-In — provides GoogleSignInClient to get ID token for Firebase
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+# Mockk — for mocking Firebase dependencies in unit tests
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+# Turbine — for testing Kotlin Flows in unit tests
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
