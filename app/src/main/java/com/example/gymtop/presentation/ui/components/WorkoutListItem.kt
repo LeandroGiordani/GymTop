@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.gymtop.R
 import com.example.gymtop.domain.model.Workout
@@ -34,6 +31,7 @@ import com.example.gymtop.domain.model.Workout
 @Composable
 fun WorkoutListItem(
     workout: Workout,
+    onTitleClick: (String) -> Unit,
     onItemClick: (Long) -> Unit,
     onDeleteClick: (Workout) -> Unit
 ) {
@@ -50,7 +48,12 @@ fun WorkoutListItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = workout.title)
+            Text(
+                modifier = Modifier
+                    .clickable { onTitleClick(workout.title) }
+                    .padding(end = 8.dp),
+                text = workout.title
+            )
             IconButton(onClick = { onDeleteClick(workout) }) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_delete_button),
@@ -61,4 +64,3 @@ fun WorkoutListItem(
         }
     }
 }
-

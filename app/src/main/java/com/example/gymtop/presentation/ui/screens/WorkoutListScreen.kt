@@ -36,7 +36,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -51,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.gymtop.R
+import com.example.gymtop.domain.model.Workout
 import com.example.gymtop.presentation.ui.components.WorkoutListItem
 import com.example.gymtop.presentation.viewmodel.UiEvent
 import com.example.gymtop.presentation.viewmodel.WorkoutContent
@@ -83,6 +86,8 @@ fun WorkoutListScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var editingWorkout by remember { mutableStateOf<Workout?>(null) }
+
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
@@ -91,6 +96,19 @@ fun WorkoutListScreen(
                 }
             }
         }
+    }
+
+    editingWorkout?.let { workout ->
+        CreateWorkoutDialog(
+            dialogLabel = "Editar Treino",
+            confirmationButtonText = "Salvar",
+            workoutTitle = workout.title,
+            onDismiss = { editingWorkout = null },
+            onConfirm = { newTitle ->
+                viewModel.updateWorkout(workout.copy(title = newTitle))
+                editingWorkout = null
+            }
+        )
     }
 
     Scaffold(
@@ -220,6 +238,7 @@ fun WorkoutListScreen(
                     ) { workout ->
                         WorkoutListItem(
                             workout = workout,
+                            onTitleClick = { editingWorkout = workout },
                             onItemClick = { onNavigateToDetail(workout.id) },
                             onDeleteClick = { viewModel.deleteWorkout(workout) }
                         )
@@ -230,6 +249,8 @@ fun WorkoutListScreen(
 
         if (uiState.showAddWorkoutDialog) {
             CreateWorkoutDialog(
+                dialogLabel = "Novo Treino",
+                confirmationButtonText = "Criar",
                 onDismiss = viewModel::closeCreateWorkoutDialog,
                 onConfirm = { workoutTitle ->
                     viewModel.addWorkout(workoutTitle)

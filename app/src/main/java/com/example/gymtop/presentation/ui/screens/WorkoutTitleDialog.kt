@@ -16,44 +16,37 @@ import androidx.compose.ui.text.input.ImeAction
 
 @Composable
 fun CreateWorkoutDialog(
+    dialogLabel: String,
+    confirmationButtonText: String,
+    workoutTitle: String = "",
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
 
     var title by rememberSaveable {
-        mutableStateOf("")
+        mutableStateOf(workoutTitle)
     }
 
-    val isValid =
-        title.trim().isNotEmpty()
+    val isValid = title.trim().isNotEmpty()
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Create workout")
+            Text(dialogLabel)
         },
         text = {
             Column {
                 OutlinedTextField(
                     value = title,
-                    onValueChange = {
-                        title = it
-                    },
-                    label = {
-                        Text("Workout name")
-                    },
+                    onValueChange = { title = it },
+                    label = { Text("Treino") },
                     singleLine = true,
-                    keyboardOptions =
-                        KeyboardOptions(
-                            imeAction = ImeAction.Done
-                        ),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions =
                         KeyboardActions(
                             onDone = {
                                 if (isValid) {
-                                    onConfirm(
-                                        title.trim()
-                                    )
+                                    onConfirm(title.trim())
                                 }
                             }
                         )
@@ -63,20 +56,14 @@ fun CreateWorkoutDialog(
         confirmButton = {
             TextButton(
                 enabled = isValid,
-                onClick = {
-                    onConfirm(
-                        title.trim()
-                    )
-                }
+                onClick = { onConfirm(title.trim()) }
             ) {
-                Text("Create")
+                Text(confirmationButtonText)
             }
         },
         dismissButton = {
-            TextButton(
-                onClick = onDismiss
-            ) {
-                Text("Cancel")
+            TextButton(onClick = onDismiss) {
+                Text("Fechar")
             }
         }
     )
