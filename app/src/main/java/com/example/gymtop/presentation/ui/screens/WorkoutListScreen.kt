@@ -28,11 +28,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -48,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.gymtop.R
 import com.example.gymtop.presentation.ui.components.WorkoutListItem
+import com.example.gymtop.presentation.viewmodel.UiEvent
 import com.example.gymtop.presentation.viewmodel.WorkoutContent
 import com.example.gymtop.presentation.viewmodel.WorkoutListViewModel
 import com.example.gymtop.ui.theme.GymTopBackground
@@ -76,7 +81,20 @@ fun WorkoutListScreen(
     val viewModel: WorkoutListViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is UiEvent.ShowSnackBar -> {
+                    snackbarHostState.showSnackbar(event.message)
+                }
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         // ── Top App Bar ───────────────────────────────────────────────
         topBar = {
             CenterAlignedTopAppBar(

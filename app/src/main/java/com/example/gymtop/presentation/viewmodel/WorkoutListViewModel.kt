@@ -2,13 +2,16 @@ package com.example.gymtop.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gymtop.di.IoDispatcher
 import com.example.gymtop.domain.repository.WorkoutRepository
 import com.example.gymtop.domain.model.Workout
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -43,6 +46,10 @@ data class WorkoutListUiState(
     val showAddWorkoutDialog: Boolean = false
 )
 
+sealed interface UiEvent {
+    data class ShowSnackBar(val message: String) : UiEvent
+}
+
 sealed interface WorkoutContent {
     object Loading : WorkoutContent
     object Empty : WorkoutContent
@@ -52,8 +59,12 @@ sealed interface WorkoutContent {
 
 @HiltViewModel
 class WorkoutListViewModel @Inject constructor(
-    private val workoutRepository: WorkoutRepository
+    private val workoutRepository: WorkoutRepository,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
+
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    val uiEvent = _uiEvent.receiveAsFlow()
 
     private val _uiState  = MutableStateFlow(WorkoutListUiState())
     val uiState = _uiState.asStateFlow()
@@ -71,7 +82,7 @@ class WorkoutListViewModel @Inject constructor(
      * Executa em background (não bloqueia a UI)
      */
     private fun observeWorkouts() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             workoutRepository.getAllWorkouts()
                 .catch { e ->
                     _uiState.update {
@@ -111,18 +122,14 @@ class WorkoutListViewModel @Inject constructor(
      * @param workoutTitle: Treino a ser inserido
      */
     fun addWorkout(workoutTitle: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             try {
-                if (workoutTitle.isNotBlank()) {
-                    workoutRepository.insertWorkout(workoutTitle)
-                }
+                workoutRepository.insertWorkout(workoutTitle)
                 // StateFlow será atualizado automaticamente via loadAllWorkouts()
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        content = WorkoutContent.Error(message = "Erro ao adicionar treino: ${e.message}")
-                    )
-                }
+                _uiEvent.send(
+                    UiEvent.ShowSnackBar("Erro ao adicionar treino: ${e.message}")
+                )
             }
             closeCreateWorkoutDialog()
         }
@@ -134,16 +141,14 @@ class WorkoutListViewModel @Inject constructor(
      * @param workout: Treino com dados atualizados
      */
     fun updateWorkout(workout: Workout) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             try {
                 // TODO: Validar dados antes de atualizar
                 workoutRepository.updateWorkout(workout)
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        content = WorkoutContent.Error(message = "Erro ao atualizar treino: ${e.message}")
-                    )
-                }
+                _uiEvent.send(
+                    UiEvent.ShowSnackBar("Erro ao atualizar treino: ${e.message}")
+                )
             }
         }
     }
@@ -153,15 +158,16 @@ class WorkoutListViewModel @Inject constructor(
      * @param workout: Treino a ser deletado
      */
     fun deleteWorkout(workout: Workout) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             try {
                 workoutRepository.deleteWorkout(workout)
+                _uiEvent.send(
+                    UiEvent.ShowSnackBar("Treino '${workout.title}' excluído com sucesso")
+                )
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        content = WorkoutContent.Error(message = "Erro ao deletar treino: ${e.message}")
-                    )
-                }
+                _uiEvent.send(
+                    UiEvent.ShowSnackBar("Erro ao excluir treino: ${e.message}")
+                )
             }
         }
     }
