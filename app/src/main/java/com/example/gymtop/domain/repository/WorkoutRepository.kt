@@ -25,9 +25,9 @@ interface WorkoutRepository {
 
     /**
      * Insere um novo treino.
-     * @param workout Objeto treino a ser persistido.
+     * @param workoutTitle String treino a ser persistido.
      */
-    suspend fun insertWorkout(workout: Workout)
+    suspend fun insertWorkout(workoutTitle: String)
 
     /**
      * Atualiza um treino existente.

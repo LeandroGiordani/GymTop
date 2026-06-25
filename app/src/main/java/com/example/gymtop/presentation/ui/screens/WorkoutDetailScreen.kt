@@ -45,7 +45,7 @@ fun WorkoutDetailScreen(
     /**
      * EXEMPLO DE IMPLEMENTAÇÃO (comentado):
      *
-     * val viewModel: WorkoutViewModel = hiltViewModel()
+     * val viewModel: WorkoutListViewModel = hiltViewModel()
      * val exerciseViewModel: ExerciseViewModel = hiltViewModel()
      *
      * LaunchedEffect(workoutId) {

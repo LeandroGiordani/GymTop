@@ -5,15 +5,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import com.example.gymtop.R
 import com.example.gymtop.domain.model.Workout
 
 /**
@@ -28,6 +31,7 @@ import com.example.gymtop.domain.model.Workout
 @Composable
 fun WorkoutListItem(
     workout: Workout,
+    onTitleClick: (Workout) -> Unit,
     onItemClick: (Long) -> Unit,
     onDeleteClick: (Workout) -> Unit
 ) {
@@ -41,13 +45,22 @@ fun WorkoutListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = workout.title)
+            Text(
+                modifier = Modifier
+                    .clickable { onTitleClick(workout) }
+                    .padding(end = 8.dp),
+                text = workout.title
+            )
             IconButton(onClick = { onDeleteClick(workout) }) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Excluir")
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_delete_button),
+                    tint = Color.Unspecified,
+                    contentDescription = "Excluir"
+                )
             }
         }
     }
 }
-
