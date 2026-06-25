@@ -7,7 +7,6 @@ import com.example.gymtop.data.mapper.toEntity
 import com.example.gymtop.domain.model.Workout
 import com.example.gymtop.domain.repository.WorkoutRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 

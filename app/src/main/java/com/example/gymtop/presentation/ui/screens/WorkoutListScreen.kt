@@ -1,5 +1,6 @@
 package com.example.gymtop.presentation.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -143,16 +144,20 @@ fun WorkoutListScreen(
 
         // ── Floating Action Button — only on Home tab ──────────────────────────
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = viewModel::openCreateWorkoutDialog,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = CircleShape
+            AnimatedVisibility(
+                visible = uiState.content is WorkoutContent.Success || uiState.content is WorkoutContent.Empty
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Novo treino"
-                )
+                FloatingActionButton(
+                    onClick = viewModel::openCreateWorkoutDialog,
+                    containerColor = GymTopNeonGreen,
+                    contentColor = GymTopOnPrimary,
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Adicionar Treino"
+                    )
+                }
             }
         },
 
@@ -199,6 +204,8 @@ fun WorkoutListScreen(
                             contentColor   = GymTopOnPrimary
                         ),
                         modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(horizontal = 24.dp, vertical = 24.dp)
                             .fillMaxWidth()
                             .height(64.dp)
                     ) {
@@ -254,7 +261,6 @@ fun WorkoutListScreen(
                 onDismiss = viewModel::closeCreateWorkoutDialog,
                 onConfirm = { workoutTitle ->
                     viewModel.addWorkout(workoutTitle)
-                    viewModel.closeCreateWorkoutDialog()
                 }
             )
         }

@@ -31,7 +31,7 @@ import com.example.gymtop.domain.model.Workout
 @Composable
 fun WorkoutListItem(
     workout: Workout,
-    onTitleClick: (String) -> Unit,
+    onTitleClick: (Workout) -> Unit,
     onItemClick: (Long) -> Unit,
     onDeleteClick: (Workout) -> Unit
 ) {
@@ -50,7 +50,7 @@ fun WorkoutListItem(
         ) {
             Text(
                 modifier = Modifier
-                    .clickable { onTitleClick(workout.title) }
+                    .clickable { onTitleClick(workout) }
                     .padding(end = 8.dp),
                 text = workout.title
             )

@@ -23,7 +23,7 @@ fun CreateWorkoutDialog(
     onConfirm: (String) -> Unit
 ) {
 
-    var title by rememberSaveable {
+    var title by rememberSaveable(workoutTitle) {
         mutableStateOf(workoutTitle)
     }
 
