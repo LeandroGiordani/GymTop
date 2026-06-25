@@ -38,7 +38,7 @@ class WorkoutRepositoryImpl @Inject constructor(
 
     /**
      * Insere um novo treino de forma assíncrona.
-     * @param workoutTitle Objeto treino a ser inserido.
+     * @param workoutTitle String título do treino a ser inserido.
      */
     override suspend fun insertWorkout(workoutTitle: String) {
         workoutDao.insert(WorkoutEntity(name = workoutTitle))

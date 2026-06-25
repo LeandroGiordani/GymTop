@@ -176,6 +176,7 @@ class WorkoutListViewModel @Inject constructor(
     }
 
     fun reloadWorkouts() {
+        _uiState.update { it.copy(content = WorkoutContent.Loading) }
         observeWorkouts()
     }
 
