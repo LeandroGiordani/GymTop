@@ -21,7 +21,7 @@ kspVersion = "2.3.7"
 firebaseBom = "33.7.0"
 # Google Sign-In (play-services-auth)
 playServicesAuth = "21.2.0"
-# Mockkito
+# Mockk
 mockk = "1.14.11"
 # Turbine
 turbine = "1.2.1"

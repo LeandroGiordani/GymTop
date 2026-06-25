@@ -69,6 +69,8 @@ class WorkoutListViewModel @Inject constructor(
     private val _uiState  = MutableStateFlow(WorkoutListUiState())
     val uiState = _uiState.asStateFlow()
 
+    private var observeJob: kotlinx.coroutines.Job? = null
+
     init {
         /**
          * Carrega todos os treinos quando o ViewModel é criado
@@ -82,7 +84,8 @@ class WorkoutListViewModel @Inject constructor(
      * Executa em background (não bloqueia a UI)
      */
     private fun observeWorkouts() {
-        viewModelScope.launch(ioDispatcher) {
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch(ioDispatcher) {
             workoutRepository.getAllWorkouts()
                 .catch { e ->
                     _uiState.update {

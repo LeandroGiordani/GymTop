@@ -238,9 +238,9 @@ fun WorkoutListScreen(
                     ) { workout ->
                         WorkoutListItem(
                             workout = workout,
-                            onTitleClick = { editingWorkout = workout },
-                            onItemClick = { onNavigateToDetail(workout.id) },
-                            onDeleteClick = { viewModel.deleteWorkout(workout) }
+                            onTitleClick = { _ -> editingWorkout = workout },
+                            onItemClick = onNavigateToDetail,
+                            onDeleteClick = viewModel::deleteWorkout
                         )
                     }
                 }
